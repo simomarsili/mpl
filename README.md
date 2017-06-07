@@ -11,7 +11,7 @@ by performing a (multinomial) logistic regression of each variable on the remain
 We used mpl to predict chromatin-related protein-protein interactions
 (details in our paper ["Epigenomic co-localization and co-evolution reveal a key role for 5hmC as a communication hub in the chromatin network of ESCs"](http://www.sciencedirect.com/science/article/pii/S2211124716000280)) and contacts located at interfaces of eukaryotic protein heterodimers (["Conservation of coevolving protein interfaces bridges prokaryote--eukaryote homologies in the twilight zone"](http://www.pnas.org/content/113/52/15018.full)).
 
-This version of the code is no longer mantained, and is deposited here for reproducibility and to make it open source. 
+This version of the code is no longer maintained, and is deposited here for reproducibility and to make it open source. 
 
 # LICENSE (BSD 3 clause)
 
@@ -30,7 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 # Citation note
 
-If this software has been useful for your work, please cite as follows:
+If this software has been useful for your work, please cite using the following bibtex entry:
 ```
 @misc{mpl,
   author       = {Simone Marsili}, 
