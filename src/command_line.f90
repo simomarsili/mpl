@@ -34,7 +34,7 @@ contains
     data_file = ''
     lambda = 0.01_DP
     wid = 0.0_DP
-    regu = 0
+    regu = 2
     skip_gaps = .false.
     do while(iarg <= nargs)
        call get_command_argument(iarg,arg)
