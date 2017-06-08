@@ -83,12 +83,7 @@ contains
        if(err > 0) write(0,*) 'error: reading data'
     end do
 
-    !    data_samples = data_samples + 1
-
-    if (any(data_samples==0)) then 
-       write(0,*) 'ERROR: the data matrix should not contain 0'
-       stop
-    end if
+    if (any(data_samples==0)) data_samples = data_samples + 1
 
     ns = maxval(data_samples)
 
