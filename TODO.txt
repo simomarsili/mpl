@@ -1,0 +1,3 @@
+- add a VERSION file
+- fix README: scores are not APC corrected
+- check command line errors
