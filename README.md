@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/93615746.svg)](https://zenodo.org/badge/latestdoi/93615746)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.804476.svg)](https://doi.org/10.5281/zenodo.804476)
 
 # mpl
 
@@ -34,10 +34,10 @@ If this software has been useful for your work, please cite using the following 
 ```
 @misc{mpl,
   author       = {Simone Marsili}, 
-  title        = {mpl (1.0)},
+  title        = {mpl (1.1)},
   month        = jun,
   year         = 2017,
-  doi          = {10.5281/zenodo.803895},
-  url          = {http://dx.doi.org/10.5281/zenodo.803895}
+  doi          = {10.5281/zenodo.804476},
+  url          = {http://dx.doi.org/10.5281/zenodo.804476}
 }
 ```
