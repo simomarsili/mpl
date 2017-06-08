@@ -1,0 +1,5 @@
+*~
+*#
+src/*.mod
+src/*.o
+src/mpl
