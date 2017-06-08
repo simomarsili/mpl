@@ -3,3 +3,6 @@
 src/*.mod
 src/*.o
 src/mpl
+test
+!500.txt
+!500.txt.SCORES
