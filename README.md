@@ -15,7 +15,7 @@ This version of the code is no longer maintained, and is deposited here for repr
 
 # LICENSE (BSD 3 clause)
 
-Copyright (c) 2015, 2016, Simone Marsili  
+Copyright (c) 2015, 2016, Simone Marsili
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:

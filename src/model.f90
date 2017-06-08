@@ -51,8 +51,6 @@ contains
 
   subroutine model_initialize(regu,lambda)
     integer(I4B) :: err
-    integer(I4B) :: iv,jv
-    integer(I4B) :: ind
     integer(I4B), intent(in) :: regu
     real(DP), intent(in) :: lambda
 
@@ -108,10 +106,9 @@ contains
     integer(I4B), intent(in) :: iv
     ! make my_couplings given myv 
     ! must be called before looping on data
-    integer(I4B) :: id,jd,jv,k,ind,mys
+    integer(I4B) :: id,jv,mys
     integer(I4B) :: err
     integer, allocatable :: list(:)
-    real(DP) :: sum,rnd
 
     myv = iv
     my_p1 = 0.0_DP
@@ -148,7 +145,7 @@ contains
     ! store my_fields in fields 
     ! store my_couplings in couplings
     ! must be called before looping on data
-    integer(I4B) :: jv,k,ind
+    integer(I4B) :: jv,k
 
     fields(:,myv) = my_fields
     
@@ -210,17 +207,12 @@ contains
     use data, only: data_samples,w,nd
     integer(I4B) :: list(nv)
     real(DP) :: conp(ns)
-    integer(I4B) :: is,jv,kv
     real(DP) :: r,rsum
-    real :: start,finish
-    real(DP) :: pp,pp0,zz,zz0
-    real(DP) :: tmp(nv)
+    real(DP) :: pp
     integer(I4B):: mys
-    integer :: ind
     integer :: id
-    integer(I4B) :: dd(nv)
-    real(DP) :: ww,rnd
-    integer(I4B) :: rd
+    real(DP) :: ww
+    integer(I4B) :: is, jv
 
     ! loop over data
     do id = 1,nd
@@ -279,7 +271,6 @@ contains
   subroutine model_parameters_pack
     integer(I4B) :: dim
     real(DP), parameter :: small_number=1.e-2_DP
-    integer(I4B) :: is,jv,js
 
     dim = ns*ns*nv
     ! compute the gradient
@@ -309,11 +300,10 @@ contains
 
     grd(1:ns) = my_p1
     grd(ns+1:) = reshape(my_p2,(/dim/))
-    
+
   end subroutine model_parameters_pack
 
   subroutine model_parameters_unpack
-    integer :: k
 
     my_fields = prm(1:ns) 
     my_couplings = reshape(prm(ns+1:),(/ns,nv,ns/))

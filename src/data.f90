@@ -34,8 +34,6 @@ contains
     integer(I4B) :: err
     character(max_string_length) :: line,newline
     integer(I4B) :: nfields
-    integer(I4B) :: iv,jv,ind
-
 
     ! read the first string
     read(udata,'(a)',iostat=err) line
@@ -83,12 +81,7 @@ contains
        if(err > 0) write(0,*) 'error: reading data'
     end do
 
-    !    data_samples = data_samples + 1
-
-    if (any(data_samples==0)) then 
-       write(0,*) 'ERROR: the data matrix should not contain 0'
-       stop
-    end if
+    if (any(data_samples==0)) data_samples = data_samples + 1
 
     ns = maxval(data_samples)
 
