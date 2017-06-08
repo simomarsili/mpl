@@ -17,6 +17,7 @@ $(PROG): $(OBJS)
 .f90.o:
 	$(FC) $(FFLAGS) -c $<
 
+%.o: %.mod
 
 nrtype.o: nrtype.f90
 dvmlm.o: dvmlm.f
