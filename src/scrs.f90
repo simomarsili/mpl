@@ -15,14 +15,11 @@ module scrs
 contains
 
   subroutine compute_scores(skip_gaps)
-    use data, only: nv,ns,neff
-    use model, only: fields,couplings
+    use data, only: nv
+    use model, only: couplings
     logical, intent(in) :: skip_gaps
-    integer :: iv,jv,k,is,js
-    real(DP) :: sums(nv),totsum
+    integer :: iv,jv,k
     integer(I4B) :: err
-    real(DP) :: rpseudo=0.5_DP,qq,ll,sij
-    real(DP) :: nrm,fpi(ns-1),fpj(ns-1),fpij(ns-1,ns-1),enti,entj,entij,mij
 
     ! at the very end of the run
     allocate(scores(nv,nv),stat=err)
@@ -84,13 +81,9 @@ contains
 
   subroutine print_scores(uscrs)
     use units
-    use data, only: nv,ns
-    use model, only: fields,couplings
+    use data, only: nv
     integer(I4B), intent(in) :: uscrs
-    integer(I4B) :: usc,uprm
-    integer(I4B) :: err
-    integer(I4B) :: iv,jv,is,js,k
-    character(80) :: filename
+    integer(I4B) :: iv,jv
     real(8) :: sij
 
     do iv = 1,nv-1

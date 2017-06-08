@@ -34,8 +34,6 @@ contains
     integer(I4B) :: err
     character(max_string_length) :: line,newline
     integer(I4B) :: nfields
-    integer(I4B) :: iv,jv,ind
-
 
     ! read the first string
     read(udata,'(a)',iostat=err) line
