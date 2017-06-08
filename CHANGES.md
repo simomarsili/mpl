@@ -2,4 +2,5 @@
 
 ## [Unreleased]
 - Added VERSION.txt
+- Scores are APC corrected
 

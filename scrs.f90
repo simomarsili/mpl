@@ -42,7 +42,7 @@ contains
        end do
     end do
     
-    !    call apc_correction(scores)
+    call apc_correction(scores)
 
   contains
 
