@@ -1,4 +1,5 @@
 # Change log
 
 ## [Unreleased]
-### Added
+- Added VERSION.txt
+
