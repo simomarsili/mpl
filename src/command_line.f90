@@ -7,7 +7,7 @@ module command_line
   private
   public :: command_line_read
   character(2) :: opts(4) = ['-i','-w','-l','-g']
-  character(1000) :: syntax = 'syntax: mpl -i <data_file> -l <>'
+  character(1000) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
 
 contains
 
@@ -78,10 +78,12 @@ contains
     ! check command line
     if (data_file == '') then
        write(0,*) 'error ! missing input data file'
+       write(0,*) trim(syntax)
        stop
     end if
     if (lambda < 1.e-5_DP) then
        write(0,*) 'error ! regularization parameter too small (< 1.e-5)'
+       write(0,*) trim(syntax)
        stop
     end if
 
