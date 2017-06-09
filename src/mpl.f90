@@ -11,17 +11,18 @@ program mpl
   use scrs,          only: compute_scores, print_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
-  integer(kint)          :: err,toterr
-  integer(kint)          :: iv
-  integer(kint)          :: niter,neval
-  real(kflt_single)      :: finish,start,start_min,end_min
-  integer(kint)          :: udata,uscrs
-  character(long_string) :: data_file,scores_file
+  character(long_string) :: data_file
+  character(long_string) :: scores_file
   real(kflt)             :: w_id
   real(kflt)             :: lambda
   logical                :: skip_gaps
-  character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
   integer(kint)          :: accuracy
+  integer(kint)          :: udata,uscrs
+  integer(kint)          :: err,iv
+  integer(kint)          :: niter,neval
+  real(kflt_single)      :: finish,start,start_min,end_min
+  character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
+  
 
   call units_initialize()
 
@@ -50,11 +51,9 @@ program mpl
   write(0,*) 'initialize...'
   call model_initialize(lambda)
 
-  call cpu_time(start_min)
-
-  ! compute averages for the model 
   write(0,*) 'minimize...'
-
+  call cpu_time(start_min)
+  ! loop over features
   do iv = 1,nv
      call model_set_myv(iv,err)
      niter = 0
@@ -64,10 +63,9 @@ program mpl
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
   end do
-  
   flush(0)
-
   call cpu_time(end_min)
+  
   write(0,*) 'minimization total (secs): ', end_min-start_min
   flush(0)
   call model_collect_prm()
