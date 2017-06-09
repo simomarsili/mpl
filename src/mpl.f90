@@ -11,21 +11,21 @@ program mpl
   use scrs,          only: compute_scores, print_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
-  integer(kint) :: err,toterr
-  integer(kint) :: iv
-  integer(kint) :: niter,neval
-  real :: finish,start,start_min,end_min
-  integer(kint) :: udata,uscrs
+  integer(kint)          :: err,toterr
+  integer(kint)          :: iv
+  integer(kint)          :: niter,neval
+  real(kflt_single)      :: finish,start,start_min,end_min
+  integer(kint)          :: udata,uscrs
   character(long_string) :: data_file,scores_file
-  real(kflt) :: w_id
-  real(kflt) :: lambda
-  logical :: skip_gaps
+  real(kflt)             :: w_id
+  real(kflt)             :: lambda
+  logical                :: skip_gaps
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
-  integer(kint) :: accuracy
+  integer(kint)          :: accuracy
 
   call units_initialize()
 
-  ! get command line args 
+  ! get command line 
   call command_line_read(data_file,w_id,lambda,skip_gaps,accuracy,err)
   if(err /= 0) then 
      write(0,*) 'error: check syntax'
@@ -47,13 +47,13 @@ program mpl
   write(0,*) 'reading data...'
   call data_read(udata,w_id)
 
-  write(0,*) 'initiale model...'
+  write(0,*) 'initialize...'
   call model_initialize(lambda)
 
   call cpu_time(start_min)
 
   ! compute averages for the model 
-  write(0,*) 'minimization...'
+  write(0,*) 'minimize...'
 
   do iv = 1,nv
      call model_set_myv(iv,err)
