@@ -4,5 +4,6 @@ src/*.mod
 src/*.o
 src/mpl
 test
+!test.bash
 !500.txt
 !500.txt.SCORES
