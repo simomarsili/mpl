@@ -14,11 +14,11 @@ contains
     use units, only: long_string
     use kinds
     character(long_string), intent(out) :: data_file
-    real(kflt),                     intent(out) :: wid
-    real(kflt),                     intent(out) :: lambda
-    logical,                      intent(out) :: skip_gaps
-    integer(kint),                 intent(out) :: accuracy
-    integer,                      intent(out) :: nerrs
+    real(kflt),             intent(out) :: wid
+    real(kflt),             intent(out) :: lambda
+    logical,                intent(out) :: skip_gaps
+    integer(kint),          intent(out) :: accuracy
+    integer,                intent(out) :: nerrs
     integer :: iarg,nargs
     integer :: err
     character(long_string) :: cmd,arg
@@ -39,20 +39,20 @@ contains
        call get_command_argument(iarg,arg)
        if (any(opts == trim(arg))) then
           select case(trim(arg))
-          case('-i','--input')
+          case('-i')
              ! input file
              iarg = iarg + 1
              call get_command_argument(iarg,arg)
              data_file = arg
              if(len_trim(data_file) == 0) then
                 nerrs = nerrs + 1
-                write(0,*) 'error: no data file name'
+                write(0,*) 'error: check data file'
              end if
              if(data_file(1:1) == '-') then
                 nerrs = nerrs + 1
-                write(0,*) 'error: no data file name'
+                write(0,*) 'error: check data file'
              end if
-          case('-w','--weigths')
+          case('-w')
              iarg = iarg + 1
              call get_command_argument(iarg,arg)
              read(arg,*,iostat=err) wid

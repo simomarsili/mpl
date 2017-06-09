@@ -46,7 +46,7 @@ contains
     end select
 
     if(err /= 0) then 
-       write(0,*) "error opening file ", filename, err,fileunit
+       write(0,*) "error opening file ", trim(filename), err,fileunit
     end if
     
   end subroutine units_open
