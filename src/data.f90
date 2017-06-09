@@ -31,9 +31,9 @@ contains
     use units, only: max_string_length
     use parser, only: parser_nfields
     integer(I4B), intent(in) :: udata
+    integer(I4B) :: nfields
     integer(I4B) :: err
     character(max_string_length) :: line,newline
-    integer(I4B) :: nfields
 
     ! read the first string
     read(udata,'(a)',iostat=err) line
@@ -64,12 +64,12 @@ contains
   subroutine data_read(udata,w_id)
     use units, only: max_string_length
     use parser, only: parser_nfields
-    integer(I4B), intent(IN) :: udata
-    real(DP), intent(IN) :: w_id
+    integer(I4B), intent(in) :: udata
+    real(DP),     intent(in) :: w_id
+    integer(I4B) :: i
+    integer(I4B) :: nfields
     integer(I4B) :: err
     character(max_string_length) :: line,newline
-    integer(I4B) :: nfields
-    integer(I4B) :: i
 
     call data_initialize(udata)
 
@@ -101,9 +101,9 @@ contains
 
   subroutine data_reweight(w_id)
     real(DP), intent(in) :: w_id
+    integer(I4B) :: id,jd
     integer(I4B) :: err
     integer(I4B), allocatable :: x(:),y(:)
-    integer(I4B) :: id,jd
 
     allocate(x(nv),y(nv),stat=err)
 

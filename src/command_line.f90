@@ -13,16 +13,15 @@ contains
   subroutine command_line_read(data_file,wid,regu,lambda,skip_gaps,nerrs)
     use units, only: max_string_length
     use nrtype
-    integer, intent(out) :: nerrs
     character(max_string_length), intent(out) :: data_file
-    real(DP), intent(out) :: wid
-    integer(I4B), intent(out) :: regu
-    real(DP), intent(out) :: lambda
-    logical, intent(out) :: skip_gaps
-    character(max_string_length) :: cmd
-    integer :: nargs
-    character(max_string_length) :: arg
-    integer :: iarg
+    real(DP),                     intent(out) :: wid
+    integer(I4B),                 intent(out) :: regu
+    real(DP),                     intent(out) :: lambda
+    logical,                      intent(out) :: skip_gaps
+    integer,                      intent(out) :: nerrs
+    integer :: iarg,nargs
+    character(max_string_length) :: cmd,arg
+
 
     call get_command(cmd)
     nargs = command_argument_count()
@@ -67,7 +66,6 @@ contains
              skip_gaps = .true.
           end select
        else
-
           write(0,'(a,1x,a)') 'error: unknown option',trim(arg)
           nerrs = nerrs + 1
        end if
