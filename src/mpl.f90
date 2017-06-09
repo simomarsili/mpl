@@ -31,11 +31,12 @@ program mpl
   real(DP) :: lambda
   logical :: skip_gaps
   character(max_string_length) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
+  integer(I4B) :: accuracy
 
   call units_initialize()
 
   ! get command line args 
-  call command_line_read(data_file,w_id,regu,lambda,skip_gaps,err)
+  call command_line_read(data_file,w_id,regu,lambda,skip_gaps,accuracy,err)
   if(err /= 0) then 
      write(0,*) 'error: check syntax'
      write(0,*) trim(syntax)
@@ -68,7 +69,7 @@ program mpl
      call model_set_myv(iv,err)
      niter = 0
      call cpu_time(start)
-     call dvmlm_minimize(niter,neval)
+     call dvmlm_minimize(accuracy,niter,neval)
      call cpu_time(finish)
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'

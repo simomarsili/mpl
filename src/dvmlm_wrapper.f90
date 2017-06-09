@@ -13,8 +13,8 @@ module dvmlm_wrapper
 
 contains
 
-  subroutine dvmlm_min(ndim,mstep,task,wa)
-    integer(I4B), intent(in) :: ndim,mstep
+  subroutine dvmlm_min(accuracy,ndim,mstep,task,wa)
+    integer(I4B), intent(in) :: accuracy,ndim,mstep
     character(60), intent(inout) :: task
     real(DP), intent(in) :: wa(:)
     integer(I4B) :: isave(5)
@@ -28,12 +28,21 @@ contains
     ! set prms for minimization
     ! frtol: desired relative error
     ! fatol: desired absolute error
-    !    frtol = 1.0e-16_DP
-    !    fatol = 1.0e-20_DP
-    !    frtol = 1.0e-8_DP
-    !    fatol = 1.0e-10_DP
-    frtol = 1.0e-4_DP
-    fatol = 1.0e-5_DP
+    select case(accuracy)
+    case(0)
+       ! low accuracy
+       frtol = 1.0e-2_DP
+       fatol = 1.0e-3_DP
+    case(1)
+       ! moderate accuracy
+       frtol = 1.0e-4_DP
+       fatol = 1.0e-6_DP
+    case(2)
+       ! high accuracy
+       frtol = 1.0e-8_DP
+       fatol = 1.0e-12_DP
+    end select
+
     fmin = -1.9e30_DP
     
     f = - etot
@@ -43,8 +52,9 @@ contains
 
   end subroutine dvmlm_min
 
-  subroutine dvmlm_minimize(iter,totiter)
+  subroutine dvmlm_minimize(accuracy,iter,totiter)
     use model, only: compute_pseudo_likelihood, model_put_myv
+    integer(I4B),intent(in) :: accuracy
     integer(I4B),intent(out) :: iter,totiter
     integer(I4B) :: err
     integer(I4B) :: ndim,mstep
@@ -69,7 +79,7 @@ contains
           write(0,*) 'warning: totiter > 100'
           flush(0)
        end if
-       call dvmlm_min(ndim,mstep,task,wa)
+       call dvmlm_min(accuracy,ndim,mstep,task,wa)
        if(task(1:2) == 'FG') then 
           ! update etot and gradient for line search
           totiter = totiter + 1

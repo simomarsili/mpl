@@ -6,11 +6,11 @@ module command_line
   implicit none
   private
   public :: command_line_read
-  character(2) :: opts(4) = ['-i','-w','-l','-g']
+  character(2) :: opts(5) = ['-i','-w','-l','-g','-a']
 
 contains
 
-  subroutine command_line_read(data_file,wid,regu,lambda,skip_gaps,nerrs)
+  subroutine command_line_read(data_file,wid,regu,lambda,skip_gaps,accuracy,nerrs)
     use units, only: max_string_length
     use nrtype
     character(max_string_length), intent(out) :: data_file
@@ -18,8 +18,10 @@ contains
     integer(I4B),                 intent(out) :: regu
     real(DP),                     intent(out) :: lambda
     logical,                      intent(out) :: skip_gaps
+    integer(I4B),                 intent(out) :: accuracy
     integer,                      intent(out) :: nerrs
     integer :: iarg,nargs
+    integer :: err
     character(max_string_length) :: cmd,arg
 
 
@@ -34,6 +36,7 @@ contains
     wid = 0.0_DP
     regu = 2
     skip_gaps = .false.
+    accuracy = 1
     do while(iarg <= nargs)
        call get_command_argument(iarg,arg)
        if (any(opts == trim(arg))) then
@@ -52,18 +55,32 @@ contains
                 write(0,*) 'error: no data file name'
              end if
           case('-w','--weigths')
-             ! weights file
              iarg = iarg + 1
              call get_command_argument(iarg,arg)
-             read(arg,*) wid
+             read(arg,*,iostat=err) wid
+             if ( err/=0 ) then
+                write(0,*) "error ! check %id (reweight)"
+                nerrs = nerrs + 1
+             end if
           case('-l')
              iarg = iarg + 1
              call get_command_argument(iarg,arg)
-             regu = 2
-             read(arg,*) lambda
+             read(arg,*,iostat=err) lambda
+             if ( err/=0 ) then
+                write(0,*) "error ! check lambda"
+                nerrs = nerrs + 1
+             end if
           case('-g')
              ! remove contrib. from state 1 to the final scores
              skip_gaps = .true.
+          case('-a')
+             iarg = iarg + 1
+             call get_command_argument(iarg,arg)
+             read(arg,*,iostat=err) accuracy
+             if ( err/=0 ) then
+                write(0,*) "error ! check accuracy"
+                nerrs = nerrs + 1
+             end if
           end select
        else
           write(0,'(a,1x,a)') 'error: unknown option',trim(arg)
@@ -79,6 +96,10 @@ contains
     end if
     if (lambda < 1.e-5_DP) then
        write(0,*) 'error ! regularization parameter too small (< 1.e-5)'
+       nerrs = nerrs + 1
+    end if
+    if (.not. any([0,1,2] == accuracy)) then
+       write(0,*) 'error ! possible accuracy values are 0,1,2'
        nerrs = nerrs + 1
     end if
 
