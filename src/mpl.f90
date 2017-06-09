@@ -5,7 +5,7 @@
 program mpl
   use kinds
   use units
-  use command_line,  only: command_line_read
+  use command_line,  only: read_args
   use data,          only: nv, data_read
   use model,         only: model_initialize, model_set_myv, model_collect_prm
   use scrs,          only: compute_scores, print_scores
@@ -27,7 +27,7 @@ program mpl
   call units_initialize()
 
   ! get command line 
-  call command_line_read(data_file,w_id,lambda,skip_gaps,accuracy,err)
+  call read_args(data_file,w_id,lambda,skip_gaps,accuracy,err)
   if(err /= 0) then 
      write(0,*) 'error: check syntax'
      write(0,*) trim(syntax)

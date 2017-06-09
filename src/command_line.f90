@@ -5,12 +5,12 @@
 module command_line
   implicit none
   private
-  public :: command_line_read
+  public :: read_args
   character(2) :: opts(5) = ['-i','-w','-l','-g','-a']
 
 contains
 
-  subroutine command_line_read(data_file,wid,lambda,skip_gaps,accuracy,nerrs)
+  subroutine read_args(data_file,wid,lambda,skip_gaps,accuracy,nerrs)
     use units, only: long_string
     use kinds
     character(long_string), intent(out) :: data_file
@@ -101,6 +101,6 @@ contains
        nerrs = nerrs + 1
     end if
 
-  end subroutine command_line_read
+  end subroutine read_args
 
 end module command_line
