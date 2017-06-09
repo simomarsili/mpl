@@ -10,12 +10,11 @@ module command_line
 
 contains
 
-  subroutine command_line_read(data_file,wid,regu,lambda,skip_gaps,accuracy,nerrs)
+  subroutine command_line_read(data_file,wid,lambda,skip_gaps,accuracy,nerrs)
     use units, only: max_string_length
     use nrtype
     character(max_string_length), intent(out) :: data_file
     real(DP),                     intent(out) :: wid
-    integer(I4B),                 intent(out) :: regu
     real(DP),                     intent(out) :: lambda
     logical,                      intent(out) :: skip_gaps
     integer(I4B),                 intent(out) :: accuracy
@@ -34,7 +33,6 @@ contains
     data_file = ''
     lambda = 0.01_DP
     wid = 0.0_DP
-    regu = 2
     skip_gaps = .false.
     accuracy = 1
     do while(iarg <= nargs)

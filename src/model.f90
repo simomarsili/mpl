@@ -38,7 +38,6 @@ module model
 
   ! regularization parameters 
   real(DP) :: regularization_strength=0.01_DP ! regularization strength; the default is l2 with regularization_strength=0.01
-  integer(I4B) :: regularization_method=2 ! the default is l2; =0 => no regularization 
 
   ! "cost" functions
   real(DP) :: mypl,ereg,etot
@@ -49,13 +48,10 @@ module model
 
 contains
 
-  subroutine model_initialize(regu,lambda)
+  subroutine model_initialize(lambda)
     integer(I4B) :: err
-    integer(I4B), intent(in) :: regu
     real(DP), intent(in) :: lambda
 
-
-    regularization_method = regu
     regularization_strength = lambda
 
     allocate(p1(ns,nv),stat=err)
@@ -85,20 +81,7 @@ contains
     my_p2 = 0.0_DP
     mypl = 0.0_DP
     etot = 0.0_DP
-    select case(regularization_method)
-    case(0)
-       ereg = 0.0_DP
-    case(1)
-       write(0,*) "ERROR: l1-regularization not implemented"
-       stop
-       !       ereg = - regularization_strength * (sum(abs(prm(:ns))) + 0.5_DP * sum(abs(prm(ns+1:))))
-       !       ereg = - regularization_strength * small_number * (sum(log(cosh(prm(:ns)/small_number))) + 0.5_DP * sum(log(cosh(prm(ns+1:)/small_number))))
-    case(2)
-       ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_DP * sum(prm(ns+1:)**2))
-    case default
-       write(0,*) "ERROR: unkown regularization method."
-       stop
-    end select
+    ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_DP * sum(prm(ns+1:)**2))
   end subroutine model_zero
 
   subroutine model_set_myv(iv,err) ! my_couplings
@@ -277,23 +260,9 @@ contains
     my_p1 = my_p1 - my_f1 
     my_p2 = my_p2 - my_f2 
 
-    select case(regularization_method)
-    case(0)
-       ! do nothing; no regularization
-    case(1) 
-       ! l1 regularization
-       write(0,*) "ERROR: l1-regularization not implemented"
-       stop
-       !       my_p1 = my_p1 + regularization_strength * tanh(my_fields/small_number)
-       !       my_p2 = my_p2 + 0.5_DP * regularization_strength * tanh(my_couplings/small_number)
-    case(2) 
-       ! l2 regularization
-       my_p1 = my_p1 + 2.0_DP * regularization_strength * my_fields
-       my_p2 = my_p2 + 2.0_DP * 0.5_DP * regularization_strength * my_couplings
-    case default
-       write(0,*) "ERROR: unkown regularization method."
-       stop
-    end select
+    ! l2 regularization
+    my_p1 = my_p1 + 2.0_DP * regularization_strength * my_fields
+    my_p2 = my_p2 + 2.0_DP * 0.5_DP * regularization_strength * my_couplings
 
     prm(1:ns) = my_fields
     prm(ns+1:) = reshape(my_couplings,(/dim/))

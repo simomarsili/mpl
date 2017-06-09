@@ -27,7 +27,6 @@ program mpl
   integer(I4B) :: udata,uscrs
   character(max_string_length) :: data_file,scores_file
   real(DP) :: w_id
-  integer(I4B) :: regu
   real(DP) :: lambda
   logical :: skip_gaps
   character(max_string_length) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
@@ -36,7 +35,7 @@ program mpl
   call units_initialize()
 
   ! get command line args 
-  call command_line_read(data_file,w_id,regu,lambda,skip_gaps,accuracy,err)
+  call command_line_read(data_file,w_id,lambda,skip_gaps,accuracy,err)
   if(err /= 0) then 
      write(0,*) 'error: check syntax'
      write(0,*) trim(syntax)
@@ -58,7 +57,7 @@ program mpl
   call data_read(udata,w_id)
 
   write(0,*) 'initiale model...'
-  call model_initialize(regu,lambda)
+  call model_initialize(lambda)
 
   call cpu_time(start_min)
 
