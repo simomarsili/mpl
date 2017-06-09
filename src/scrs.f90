@@ -3,14 +3,14 @@
 ! License: BSD 3 clause
 
 module scrs
-  use nrtype
+  use kinds
   implicit none
   private 
 
   public :: compute_scores
   public :: print_scores
 
-  real(DP), allocatable, save :: scores(:,:)
+  real(kflt), allocatable, save :: scores(:,:)
 
 contains
 
@@ -19,11 +19,11 @@ contains
     use model, only: couplings
     logical, intent(in) :: skip_gaps
     integer :: iv,jv,k
-    integer(I4B) :: err
+    integer(kint) :: err
 
     ! at the very end of the run
     allocate(scores(nv,nv),stat=err)
-    scores = 0.0_DP
+    scores = 0.0_kflt
 
     ! compute scores
     k = 0
@@ -43,20 +43,20 @@ contains
 
   contains
 
-    real(DP) function frobenius(a)
-      real(DP), intent(in) :: a(:,:)
+    real(kflt) function frobenius(a)
+      real(kflt), intent(in) :: a(:,:)
 
       frobenius = sqrt(sum(a**2))
 
     end function frobenius
 
     subroutine apc_correction(a)
-      real(DP), intent(inout) :: a(:,:)
-      real(DP), allocatable :: sums(:)
-      real(DP) :: totsum
-      integer(I4B) :: err
-      integer(I4B) :: i,j
-      integer(I4B) :: n
+      real(kflt), intent(inout) :: a(:,:)
+      real(kflt), allocatable :: sums(:)
+      real(kflt) :: totsum
+      integer(kint) :: err
+      integer(kint) :: i,j
+      integer(kint) :: n
 
       n = size(a,1)
       allocate(sums(n),stat=err)
@@ -82,8 +82,8 @@ contains
   subroutine print_scores(uscrs)
     use units
     use data, only: nv
-    integer(I4B), intent(in) :: uscrs
-    integer(I4B) :: iv,jv
+    integer(kint), intent(in) :: uscrs
+    integer(kint) :: iv,jv
     real(8) :: sij
 
     do iv = 1,nv-1

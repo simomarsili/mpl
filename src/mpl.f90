@@ -3,7 +3,7 @@
 ! License: BSD 3 clause
 
 program mpl
-  use nrtype
+  use kinds
   use units
   use command_line,  only: command_line_read
   use data,          only: nv, data_read
@@ -11,17 +11,17 @@ program mpl
   use scrs,          only: compute_scores, print_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
-  integer(I4B) :: err,toterr
-  integer(I4B) :: iv
-  integer(I4B) :: niter,neval
+  integer(kint) :: err,toterr
+  integer(kint) :: iv
+  integer(kint) :: niter,neval
   real :: finish,start,start_min,end_min
-  integer(I4B) :: udata,uscrs
+  integer(kint) :: udata,uscrs
   character(long_string) :: data_file,scores_file
-  real(DP) :: w_id
-  real(DP) :: lambda
+  real(kflt) :: w_id
+  real(kflt) :: lambda
   logical :: skip_gaps
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
-  integer(I4B) :: accuracy
+  integer(kint) :: accuracy
 
   call units_initialize()
 

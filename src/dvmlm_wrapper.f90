@@ -3,7 +3,7 @@
 ! License: BSD 3 clause
 
 module dvmlm_wrapper
-  use nrtype
+  use kinds
   use model, only: prm, grd, etot
   ! wrapper to dvmlm subroutine 
   implicit none
@@ -14,15 +14,15 @@ module dvmlm_wrapper
 contains
 
   subroutine dvmlm_min(accuracy,ndim,mstep,task,wa)
-    integer(I4B), intent(in) :: accuracy,ndim,mstep
+    integer(kint), intent(in) :: accuracy,ndim,mstep
     character(60), intent(inout) :: task
-    real(DP), intent(in) :: wa(:)
-    integer(I4B) :: isave(5)
-    real(DP) :: dsave(24)
-    real(DP) :: f
-    real(DP) :: frtol
-    real(DP) :: fatol
-    real(DP) :: fmin
+    real(kflt), intent(in) :: wa(:)
+    integer(kint) :: isave(5)
+    real(kflt) :: dsave(24)
+    real(kflt) :: f
+    real(kflt) :: frtol
+    real(kflt) :: fatol
+    real(kflt) :: fmin
     external dvmlm
 
     ! set prms for minimization
@@ -31,19 +31,19 @@ contains
     select case(accuracy)
     case(0)
        ! low accuracy
-       frtol = 1.0e-2_DP
-       fatol = 1.0e-3_DP
+       frtol = 1.0e-2_kflt
+       fatol = 1.0e-3_kflt
     case(1)
        ! moderate accuracy
-       frtol = 1.0e-4_DP
-       fatol = 1.0e-6_DP
+       frtol = 1.0e-4_kflt
+       fatol = 1.0e-6_kflt
     case(2)
        ! high accuracy
-       frtol = 1.0e-8_DP
-       fatol = 1.0e-12_DP
+       frtol = 1.0e-8_kflt
+       fatol = 1.0e-12_kflt
     end select
 
-    fmin = -1.9e30_DP
+    fmin = -1.9e30_kflt
     
     f = - etot
     call dvmlm(ndim,prm,f,grd,frtol,fatol,fmin,task,mstep,&
@@ -54,12 +54,12 @@ contains
 
   subroutine dvmlm_minimize(accuracy,iter,totiter)
     use model, only: compute_pseudo_likelihood, model_put_myv
-    integer(I4B),intent(in) :: accuracy
-    integer(I4B),intent(out) :: iter,totiter
-    integer(I4B) :: err
-    integer(I4B) :: ndim,mstep
+    integer(kint),intent(in) :: accuracy
+    integer(kint),intent(out) :: iter,totiter
+    integer(kint) :: err
+    integer(kint) :: ndim,mstep
     character(60) :: task
-    real(DP), allocatable :: wa(:)
+    real(kflt), allocatable :: wa(:)
     integer :: lwa
     
     iter = 0

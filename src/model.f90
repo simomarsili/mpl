@@ -3,7 +3,7 @@
 ! License: BSD 3 clause
 
 module model
-  use nrtype
+  use kinds
   use data, only: nv,ns,nd
   implicit none
   private
@@ -22,35 +22,35 @@ module model
   public :: couplings
 
   ! working variable for the processor
-  integer(I4B) :: myv 
-  real(DP), allocatable :: fields(:,:) ! NS x NV
-  real(DP), allocatable :: couplings(:,:,:) ! NS x NS x NV(NV-1)/2 
-  real(DP), allocatable :: p1(:,:) ! NS x NV
-  real(DP), allocatable :: p2(:,:,:) ! NS x NS x NV(NV-1)/2 
+  integer(kint) :: myv 
+  real(kflt), allocatable :: fields(:,:) ! NS x NV
+  real(kflt), allocatable :: couplings(:,:,:) ! NS x NS x NV(NV-1)/2 
+  real(kflt), allocatable :: p1(:,:) ! NS x NV
+  real(kflt), allocatable :: p2(:,:,:) ! NS x NS x NV(NV-1)/2 
 
   ! arrays for fixed residue/sequence
-  real(DP), allocatable, save :: my_fields(:) ! NS
-  real(DP), allocatable, save :: my_couplings(:,:,:) ! NS x NV x NS
-  real(DP), allocatable, save :: my_p1(:) ! NS 
-  real(DP), allocatable, save :: my_p2(:,:,:) ! NS x NV x NS
-  real(DP), allocatable, save :: my_f1(:) ! NS 
-  real(DP), allocatable, save :: my_f2(:,:,:) ! NS x NV x NS
+  real(kflt), allocatable, save :: my_fields(:) ! NS
+  real(kflt), allocatable, save :: my_couplings(:,:,:) ! NS x NV x NS
+  real(kflt), allocatable, save :: my_p1(:) ! NS 
+  real(kflt), allocatable, save :: my_p2(:,:,:) ! NS x NV x NS
+  real(kflt), allocatable, save :: my_f1(:) ! NS 
+  real(kflt), allocatable, save :: my_f2(:,:,:) ! NS x NV x NS
 
   ! regularization parameters 
-  real(DP) :: regularization_strength=0.01_DP ! regularization strength; the default is l2 with regularization_strength=0.01
+  real(kflt) :: regularization_strength=0.01_kflt ! regularization strength; the default is l2 with regularization_strength=0.01
 
   ! "cost" functions
-  real(DP) :: mypl,ereg,etot
+  real(kflt) :: mypl,ereg,etot
 
   ! gradients arrays
-  real(DP), allocatable, save :: grd(:) ! NS + NS x NV x NS
-  real(DP), allocatable, save :: prm(:) ! NS + NS x NV x NS
+  real(kflt), allocatable, save :: grd(:) ! NS + NS x NV x NS
+  real(kflt), allocatable, save :: prm(:) ! NS + NS x NV x NS
 
 contains
 
   subroutine model_initialize(lambda)
-    integer(I4B) :: err
-    real(DP), intent(in) :: lambda
+    integer(kint) :: err
+    real(kflt), intent(in) :: lambda
 
     regularization_strength = lambda
 
@@ -68,48 +68,48 @@ contains
     allocate(prm(ns + ns*ns*nv),stat=err)
 
 
-    p1 = 0.0_DP
-    p2 = 0.0_DP
-    fields = 0.0_DP
-    couplings = 0.0_DP       
+    p1 = 0.0_kflt
+    p2 = 0.0_kflt
+    fields = 0.0_kflt
+    couplings = 0.0_kflt       
 
   end subroutine model_initialize
 
   subroutine model_zero()
-    real(DP), parameter :: small_number=1.e-2_DP
-    my_p1 = 0.0_DP
-    my_p2 = 0.0_DP
-    mypl = 0.0_DP
-    etot = 0.0_DP
-    ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_DP * sum(prm(ns+1:)**2))
+    real(kflt), parameter :: small_number=1.e-2_kflt
+    my_p1 = 0.0_kflt
+    my_p2 = 0.0_kflt
+    mypl = 0.0_kflt
+    etot = 0.0_kflt
+    ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_kflt * sum(prm(ns+1:)**2))
   end subroutine model_zero
 
   subroutine model_set_myv(iv,err) ! my_couplings
     use data, only: nd,data_samples,w
-    integer(I4B), intent(in) :: iv
+    integer(kint), intent(in) :: iv
     ! make my_couplings given myv 
     ! must be called before looping on data
-    integer(I4B) :: id,jv,mys
-    integer(I4B) :: err
+    integer(kint) :: id,jv,mys
+    integer(kint) :: err
     integer, allocatable :: list(:)
 
     myv = iv
-    my_p1 = 0.0_DP
-    my_p2 = 0.0_DP
-    my_f1 = 0.0_DP
-    my_f2 = 0.0_DP
-    my_fields = 0.0_DP
-    my_couplings = 0.0_DP       
-    mypl = 0.0_DP
-    etot = 0.0_DP
-    ereg = 0.0_DP
-    prm = 0.0_DP
-    grd = 0.0_DP
+    my_p1 = 0.0_kflt
+    my_p2 = 0.0_kflt
+    my_f1 = 0.0_kflt
+    my_f2 = 0.0_kflt
+    my_fields = 0.0_kflt
+    my_couplings = 0.0_kflt       
+    mypl = 0.0_kflt
+    etot = 0.0_kflt
+    ereg = 0.0_kflt
+    prm = 0.0_kflt
+    grd = 0.0_kflt
 
     ! compute variable-specific arrays of frequencies
     allocate(list(nv),stat=err)
-    my_f1 = 0.0_DP
-    my_f2 = 0.0_DP
+    my_f1 = 0.0_kflt
+    my_f2 = 0.0_kflt
     do id = 1,nd
        list = data_samples(:,id)
        mys = list(myv)
@@ -128,7 +128,7 @@ contains
     ! store my_fields in fields 
     ! store my_couplings in couplings
     ! must be called before looping on data
-    integer(I4B) :: jv,k
+    integer(kint) :: jv,k
 
     fields(:,myv) = my_fields
     
@@ -157,9 +157,9 @@ contains
   end subroutine model_put_myv
 
   subroutine model_gauge
-    integer(I4B) :: jv,is,js
-    real(DP) :: mat(ns,ns),arr(ns),marr
-    real(DP) :: rsum(ns),csum(ns),totsum
+    integer(kint) :: jv,is,js
+    real(kflt) :: mat(ns,ns),arr(ns),marr
+    real(kflt) :: rsum(ns),csum(ns),totsum
 
     arr = my_fields
     marr = sum(arr) / real(ns)
@@ -188,14 +188,14 @@ contains
 
   subroutine compute_pseudo_conp()
     use data, only: data_samples,w,nd
-    integer(I4B) :: list(nv)
-    real(DP) :: conp(ns)
-    real(DP) :: r,rsum
-    real(DP) :: pp
-    integer(I4B):: mys
+    integer(kint) :: list(nv)
+    real(kflt) :: conp(ns)
+    real(kflt) :: r,rsum
+    real(kflt) :: pp
+    integer(kint):: mys
     integer :: id
-    real(DP) :: ww
-    integer(I4B) :: is, jv
+    real(kflt) :: ww
+    integer(kint) :: is, jv
 
     ! loop over data
     do id = 1,nd
@@ -236,8 +236,8 @@ contains
   end subroutine compute_pseudo_conp
 
   subroutine compute_pseudo_likelihood(it)
-    integer(I4B), intent(in) :: it
-    real(DP) :: etot0,de
+    integer(kint), intent(in) :: it
+    real(kflt) :: etot0,de
 
     call model_parameters_unpack()
 
@@ -252,8 +252,8 @@ contains
   end subroutine compute_pseudo_likelihood
 
   subroutine model_parameters_pack
-    integer(I4B) :: dim
-    real(DP), parameter :: small_number=1.e-2_DP
+    integer(kint) :: dim
+    real(kflt), parameter :: small_number=1.e-2_kflt
 
     dim = ns*ns*nv
     ! compute the gradient
@@ -261,8 +261,8 @@ contains
     my_p2 = my_p2 - my_f2 
 
     ! l2 regularization
-    my_p1 = my_p1 + 2.0_DP * regularization_strength * my_fields
-    my_p2 = my_p2 + 2.0_DP * 0.5_DP * regularization_strength * my_couplings
+    my_p1 = my_p1 + 2.0_kflt * regularization_strength * my_fields
+    my_p2 = my_p2 + 2.0_kflt * 0.5_kflt * regularization_strength * my_couplings
 
     prm(1:ns) = my_fields
     prm(ns+1:) = reshape(my_couplings,(/dim/))
@@ -281,7 +281,7 @@ contains
 
   subroutine model_collect_prm
 
-    couplings = 0.5_DP * couplings
+    couplings = 0.5_kflt * couplings
 
   end subroutine model_collect_prm
   

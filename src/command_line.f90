@@ -12,12 +12,12 @@ contains
 
   subroutine command_line_read(data_file,wid,lambda,skip_gaps,accuracy,nerrs)
     use units, only: long_string
-    use nrtype
+    use kinds
     character(long_string), intent(out) :: data_file
-    real(DP),                     intent(out) :: wid
-    real(DP),                     intent(out) :: lambda
+    real(kflt),                     intent(out) :: wid
+    real(kflt),                     intent(out) :: lambda
     logical,                      intent(out) :: skip_gaps
-    integer(I4B),                 intent(out) :: accuracy
+    integer(kint),                 intent(out) :: accuracy
     integer,                      intent(out) :: nerrs
     integer :: iarg,nargs
     integer :: err
@@ -31,8 +31,8 @@ contains
     iarg = 1
     nerrs = 0
     data_file = ''
-    lambda = 0.01_DP
-    wid = 0.0_DP
+    lambda = 0.01_kflt
+    wid = 0.0_kflt
     skip_gaps = .false.
     accuracy = 1
     do while(iarg <= nargs)
@@ -92,7 +92,7 @@ contains
        write(0,*) 'error ! missing input data file'
        nerrs = nerrs + 1
     end if
-    if (lambda < 1.e-5_DP) then
+    if (lambda < 1.e-5_kflt) then
        write(0,*) 'error ! regularization parameter too small (< 1.e-5)'
        nerrs = nerrs + 1
     end if

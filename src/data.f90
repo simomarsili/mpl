@@ -3,7 +3,7 @@
 ! License: BSD 3 clause
 
 module data
-  use nrtype
+  use kinds
   implicit none
   private
 
@@ -17,22 +17,22 @@ module data
 
   public :: data_read
 
-  integer(I4B) :: nd   ! number of data samples
-  integer(I4B) :: nv   ! number of variables
-  integer(I4B) :: ns ! number of states per variable
+  integer(kint) :: nd   ! number of data samples
+  integer(kint) :: nv   ! number of variables
+  integer(kint) :: ns ! number of states per variable
 
-  integer(I4B), allocatable :: data_samples(:,:)
-  real(DP), allocatable :: w(:)
-  real(DP) :: neff
+  integer(kint), allocatable :: data_samples(:,:)
+  real(kflt), allocatable :: w(:)
+  real(kflt) :: neff
 
 contains
 
   subroutine data_initialize(udata)
     use units, only: long_string
     use parser, only: parser_nfields
-    integer(I4B), intent(in) :: udata
-    integer(I4B) :: nfields
-    integer(I4B) :: err
+    integer(kint), intent(in) :: udata
+    integer(kint) :: nfields
+    integer(kint) :: err
     character(long_string) :: line,newline
 
     ! read the first string
@@ -64,11 +64,11 @@ contains
   subroutine data_read(udata,w_id)
     use units, only: long_string
     use parser, only: parser_nfields
-    integer(I4B), intent(in) :: udata
-    real(DP),     intent(in) :: w_id
-    integer(I4B) :: i
-    integer(I4B) :: nfields
-    integer(I4B) :: err
+    integer(kint), intent(in) :: udata
+    real(kflt),     intent(in) :: w_id
+    integer(kint) :: i
+    integer(kint) :: nfields
+    integer(kint) :: err
     character(long_string) :: line,newline
 
     call data_initialize(udata)
@@ -90,24 +90,24 @@ contains
     write(0,*) 'ns: ', ns
     flush(0)
 
-    if(w_id > 1.E-10_DP) then
+    if(w_id > 1.E-10_kflt) then
        write(0,*) 'computing weights...'
        call data_reweight(w_id)
     else
-       w = 1.0_DP / real(nd)
+       w = 1.0_kflt / real(nd)
     end if
 
   end subroutine data_read
 
   subroutine data_reweight(w_id)
-    real(DP), intent(in) :: w_id
-    integer(I4B) :: id,jd
-    integer(I4B) :: err
-    integer(I4B), allocatable :: x(:),y(:)
+    real(kflt), intent(in) :: w_id
+    integer(kint) :: id,jd
+    integer(kint) :: err
+    integer(kint), allocatable :: x(:),y(:)
 
     allocate(x(nv),y(nv),stat=err)
 
-    w = 1.0_DP
+    w = 1.0_kflt
     do id = 1,nd-1
        if(mod(id,1000) == 0) then
           write(0,'(f5.1,a)') 100.0 * real(id) / real(nd),' %'
@@ -115,14 +115,14 @@ contains
        x = data_samples(:,id)
        do jd = id+1,nd
           y = data_samples(:,jd)
-          if(count(x == y) >= nint(nv * w_id * 0.01_DP)) then
-             w(id) = w(id) + 1.0_DP
-             w(jd) = w(jd) + 1.0_DP
+          if(count(x == y) >= nint(nv * w_id * 0.01_kflt)) then
+             w(id) = w(id) + 1.0_kflt
+             w(jd) = w(jd) + 1.0_kflt
           end if
        end do
     end do
 
-    w = 1.0_DP / w
+    w = 1.0_kflt / w
     neff = sum(w)
     w = w / neff
    write(0,*) 'neff: ', neff
