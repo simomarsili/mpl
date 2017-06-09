@@ -28,12 +28,12 @@ module data
 contains
 
   subroutine data_initialize(udata)
-    use units, only: max_string_length
+    use units, only: long_string
     use parser, only: parser_nfields
     integer(I4B), intent(in) :: udata
     integer(I4B) :: nfields
     integer(I4B) :: err
-    character(max_string_length) :: line,newline
+    character(long_string) :: line,newline
 
     ! read the first string
     read(udata,'(a)',iostat=err) line
@@ -62,14 +62,14 @@ contains
   end subroutine data_initialize
 
   subroutine data_read(udata,w_id)
-    use units, only: max_string_length
+    use units, only: long_string
     use parser, only: parser_nfields
     integer(I4B), intent(in) :: udata
     real(DP),     intent(in) :: w_id
     integer(I4B) :: i
     integer(I4B) :: nfields
     integer(I4B) :: err
-    character(max_string_length) :: line,newline
+    character(long_string) :: line,newline
 
     call data_initialize(udata)
 

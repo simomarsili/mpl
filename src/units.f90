@@ -7,10 +7,10 @@ module units
   private 
   public :: units_initialize
   public :: units_open
-  public :: max_string_length
+  public :: long_string
   
   integer :: nunits
-  integer, parameter :: max_string_length=10000
+  integer, parameter :: long_string=10000
 
 contains
 
@@ -23,7 +23,7 @@ contains
   
   subroutine units_open(filename,fileunit,flag,err)
     implicit none
-    character(max_string_length), intent(in) :: filename
+    character(long_string), intent(in) :: filename
     character(1), intent(in) :: flag
     integer, intent(out) :: fileunit
     integer, intent(out) :: err

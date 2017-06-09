@@ -5,31 +5,22 @@
 program mpl
   use nrtype
   use units
-  use command_line, only: &
-       command_line_read
-  use data, only: &
-       nv, &
-       data_read
-  use model, only: &
-       model_initialize, &
-       model_set_myv, &
-       model_collect_prm
-  use scrs, only: &
-       compute_scores, &
-       print_scores
-  use dvmlm_wrapper, only: &
-       dvmlm_minimize
+  use command_line,  only: command_line_read
+  use data,          only: nv, data_read
+  use model,         only: model_initialize, model_set_myv, model_collect_prm
+  use scrs,          only: compute_scores, print_scores
+  use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
   integer(I4B) :: err,toterr
   integer(I4B) :: iv
   integer(I4B) :: niter,neval
   real :: finish,start,start_min,end_min
   integer(I4B) :: udata,uscrs
-  character(max_string_length) :: data_file,scores_file
+  character(long_string) :: data_file,scores_file
   real(DP) :: w_id
   real(DP) :: lambda
   logical :: skip_gaps
-  character(max_string_length) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
+  character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
   integer(I4B) :: accuracy
 
   call units_initialize()

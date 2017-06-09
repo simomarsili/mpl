@@ -11,9 +11,9 @@ module command_line
 contains
 
   subroutine command_line_read(data_file,wid,lambda,skip_gaps,accuracy,nerrs)
-    use units, only: max_string_length
+    use units, only: long_string
     use nrtype
-    character(max_string_length), intent(out) :: data_file
+    character(long_string), intent(out) :: data_file
     real(DP),                     intent(out) :: wid
     real(DP),                     intent(out) :: lambda
     logical,                      intent(out) :: skip_gaps
@@ -21,7 +21,7 @@ contains
     integer,                      intent(out) :: nerrs
     integer :: iarg,nargs
     integer :: err
-    character(max_string_length) :: cmd,arg
+    character(long_string) :: cmd,arg
 
 
     call get_command(cmd)
