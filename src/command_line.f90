@@ -7,11 +7,10 @@ module command_line
   private
   public :: command_line_read
   character(2) :: opts(4) = ['-i','-w','-l','-g']
-  character(1000) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
 
 contains
 
-  subroutine command_line_read(nerrs,data_file,wid,regu,lambda,skip_gaps)
+  subroutine command_line_read(data_file,wid,regu,lambda,skip_gaps,nerrs)
     use units, only: max_string_length
     use nrtype
     integer, intent(out) :: nerrs
@@ -78,13 +77,11 @@ contains
     ! check command line
     if (data_file == '') then
        write(0,*) 'error ! missing input data file'
-       write(0,*) trim(syntax)
-       stop
+       nerrs = nerrs + 1
     end if
     if (lambda < 1.e-5_DP) then
        write(0,*) 'error ! regularization parameter too small (< 1.e-5)'
-       write(0,*) trim(syntax)
-       stop
+       nerrs = nerrs + 1
     end if
 
   end subroutine command_line_read

@@ -30,30 +30,28 @@ program mpl
   integer(I4B) :: regu
   real(DP) :: lambda
   logical :: skip_gaps
+  character(max_string_length) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
 
   call units_initialize()
 
-  toterr=0
   ! get command line args 
-  call command_line_read(err,data_file,w_id,regu,lambda,skip_gaps)
-  if(len_trim(data_file) == 0) then 
-     toterr = toterr + 1
-     write(0,*) 'error: data filename is needed'
+  call command_line_read(data_file,w_id,regu,lambda,skip_gaps,err)
+  if(err /= 0) then 
+     write(0,*) 'error: check syntax'
+     write(0,*) trim(syntax)
+     stop
   end if
 
   ! open data file
   call units_open(data_file,udata,'O',err)
   if(err /= 0) then 
-     toterr = toterr + 1
      write(0,*) 'error: cant find data file'
-  end if
-  scores_file = trim(data_file)//'.scores'
-  call units_open(scores_file,uscrs,'U',err)
-
-  if (toterr > 0) then 
-     write(0,*) 'program will exit'
      stop
   end if
+  
+  ! open scores file
+  scores_file = trim(data_file)//'.scores'
+  call units_open(scores_file,uscrs,'U',err)
 
   write(0,*) 'reading data...'
   call data_read(udata,w_id)
