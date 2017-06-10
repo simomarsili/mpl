@@ -17,11 +17,11 @@ module data
 
   public :: data_read
 
-  integer(kint) :: nd   ! number of data samples
-  integer(kint) :: nv   ! number of variables
-  integer(kint) :: ns ! number of states per variable
+  integer :: nd   ! number of data samples
+  integer :: nv   ! number of variables
+  integer :: ns ! number of states per variable
 
-  integer(kint), allocatable :: data_samples(:,:)
+  integer, allocatable :: data_samples(:,:)
   real(kflt), allocatable :: w(:)
   real(kflt) :: neff
 
@@ -30,9 +30,9 @@ contains
   subroutine data_initialize(udata)
     use constants, only: long_string
     use parser, only: parser_nfields
-    integer(kint), intent(in) :: udata
-    integer(kint) :: nfields
-    integer(kint) :: err
+    integer, intent(in) :: udata
+    integer :: nfields
+    integer :: err
     character(long_string) :: line,newline
 
     ! read the first string
@@ -64,11 +64,11 @@ contains
   subroutine data_read(udata,w_id)
     use constants, only: long_string
     use parser, only: parser_nfields
-    integer(kint), intent(in) :: udata
-    real(kflt),     intent(in) :: w_id
-    integer(kint) :: i
-    integer(kint) :: nfields
-    integer(kint) :: err
+    integer,    intent(in) :: udata
+    real(kflt), intent(in) :: w_id
+    integer :: i
+    integer :: nfields
+    integer :: err
     character(long_string) :: line,newline
 
     call data_initialize(udata)
@@ -101,9 +101,9 @@ contains
 
   subroutine data_reweight(w_id)
     real(kflt), intent(in) :: w_id
-    integer(kint) :: id,jd
-    integer(kint) :: err
-    integer(kint), allocatable :: x(:),y(:)
+    integer :: id,jd
+    integer :: err
+    integer, allocatable :: x(:),y(:)
 
     allocate(x(nv),y(nv),stat=err)
 

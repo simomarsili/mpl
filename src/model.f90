@@ -22,7 +22,7 @@ module model
   public :: couplings
 
   ! working variable for the processor
-  integer(kint) :: myv 
+  integer :: myv 
   real(kflt), allocatable :: fields(:,:) ! NS x NV
   real(kflt), allocatable :: couplings(:,:,:) ! NS x NS x NV(NV-1)/2 
   real(kflt), allocatable :: p1(:,:) ! NS x NV
@@ -49,8 +49,8 @@ module model
 contains
 
   subroutine model_initialize(lambda)
-    integer(kint) :: err
     real(kflt), intent(in) :: lambda
+    integer :: err
 
     regularization_strength = lambda
 
@@ -86,11 +86,11 @@ contains
 
   subroutine model_set_myv(iv,err) ! my_couplings
     use data, only: nd,data_samples,w
-    integer(kint), intent(in) :: iv
+    integer, intent(in) :: iv
     ! make my_couplings given myv 
     ! must be called before looping on data
-    integer(kint) :: id,jv,mys
-    integer(kint) :: err
+    integer :: id,jv,mys
+    integer :: err
     integer, allocatable :: list(:)
 
     myv = iv
@@ -128,7 +128,7 @@ contains
     ! store my_fields in fields 
     ! store my_couplings in couplings
     ! must be called before looping on data
-    integer(kint) :: jv,k
+    integer :: jv,k
 
     fields(:,myv) = my_fields
     
@@ -157,7 +157,7 @@ contains
   end subroutine model_put_myv
 
   subroutine model_gauge
-    integer(kint) :: jv,is,js
+    integer :: jv,is,js
     real(kflt) :: mat(ns,ns),arr(ns),marr
     real(kflt) :: rsum(ns),csum(ns),totsum
 
@@ -188,14 +188,14 @@ contains
 
   subroutine compute_pseudo_conp()
     use data, only: data_samples,w,nd
-    integer(kint) :: list(nv)
+    integer :: list(nv)
     real(kflt) :: conp(ns)
     real(kflt) :: r,rsum
     real(kflt) :: pp
-    integer(kint):: mys
+    integer :: mys
     integer :: id
     real(kflt) :: ww
-    integer(kint) :: is, jv
+    integer :: is, jv
 
     ! loop over data
     do id = 1,nd
@@ -236,7 +236,7 @@ contains
   end subroutine compute_pseudo_conp
 
   subroutine compute_pseudo_likelihood(it)
-    integer(kint), intent(in) :: it
+    integer, intent(in) :: it
     real(kflt) :: etot0,de
 
     call model_parameters_unpack()
@@ -252,7 +252,7 @@ contains
   end subroutine compute_pseudo_likelihood
 
   subroutine model_parameters_pack
-    integer(kint) :: dim
+    integer :: dim
     real(kflt), parameter :: small_number=1.e-2_kflt
 
     dim = ns*ns*nv

@@ -40,7 +40,7 @@ contains
     real(kflt),             intent(out) :: wid
     real(kflt),             intent(out) :: lambda
     logical,                intent(out) :: skip_gaps
-    integer(kint),          intent(out) :: accuracy
+    integer,                intent(out) :: accuracy
     integer,                intent(out) :: nerrs
     integer :: iarg,nargs
     integer :: err

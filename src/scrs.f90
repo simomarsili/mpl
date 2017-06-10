@@ -19,7 +19,7 @@ contains
     use model, only: couplings
     logical, intent(in) :: skip_gaps
     integer :: iv,jv,k
-    integer(kint) :: err
+    integer :: err
 
     ! at the very end of the run
     allocate(scores(nv,nv),stat=err)
@@ -54,9 +54,9 @@ contains
       real(kflt), intent(inout) :: a(:,:)
       real(kflt), allocatable :: sums(:)
       real(kflt) :: totsum
-      integer(kint) :: err
-      integer(kint) :: i,j
-      integer(kint) :: n
+      integer :: err
+      integer :: i,j
+      integer :: n
 
       n = size(a,1)
       allocate(sums(n),stat=err)
@@ -82,8 +82,8 @@ contains
   subroutine print_scores(uscrs)
     use units
     use data, only: nv
-    integer(kint), intent(in) :: uscrs
-    integer(kint) :: iv,jv
+    integer, intent(in) :: uscrs
+    integer :: iv,jv
     real(8) :: sij
 
     do iv = 1,nv-1

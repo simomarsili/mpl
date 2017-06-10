@@ -14,10 +14,10 @@ module dvmlm_wrapper
 contains
 
   subroutine dvmlm_min(accuracy,ndim,mstep,task,wa)
-    integer(kint), intent(in) :: accuracy,ndim,mstep
+    integer,       intent(in) :: accuracy,ndim,mstep
     character(60), intent(inout) :: task
-    real(kflt), intent(in) :: wa(:)
-    integer(kint) :: isave(5)
+    real(kflt),    intent(in) :: wa(:)
+    integer       :: isave(5)
     real(kflt) :: dsave(24)
     real(kflt) :: f
     real(kflt) :: frtol
@@ -54,10 +54,10 @@ contains
 
   subroutine dvmlm_minimize(accuracy,iter,totiter)
     use model, only: compute_pseudo_likelihood, model_put_myv
-    integer(kint),intent(in) :: accuracy
-    integer(kint),intent(out) :: iter,totiter
-    integer(kint) :: err
-    integer(kint) :: ndim,mstep
+    integer, intent(in) :: accuracy
+    integer, intent(out) :: iter,totiter
+    integer :: err
+    integer :: ndim,mstep
     character(60) :: task
     real(kflt), allocatable :: wa(:)
     integer :: lwa

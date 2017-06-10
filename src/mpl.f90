@@ -4,7 +4,7 @@
 
 program mpl
   use kinds
-  use constants, only: long_string
+  use constants,     only: long_string
   use units
   use command_line,  only: read_args
   use data,          only: nv, data_read
@@ -17,10 +17,10 @@ program mpl
   real(kflt)             :: w_id
   real(kflt)             :: lambda
   logical                :: skip_gaps
-  integer(kint)          :: accuracy
-  integer(kint)          :: udata,uscrs
-  integer(kint)          :: err,iv
-  integer(kint)          :: niter,neval
+  integer                :: accuracy
+  integer                :: udata,uscrs
+  integer                :: err,iv
+  integer                :: niter,neval
   real(kflt_single)      :: finish,start,start_min,end_min
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
   
