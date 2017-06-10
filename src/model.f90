@@ -186,7 +186,7 @@ contains
     
   end subroutine model_gauge
 
-  subroutine compute_pseudo_conp()
+  subroutine update_cond_prob()
     use data, only: data_samples,w,nd
     integer :: list(nv)
     real(kflt) :: conp(ns)
@@ -233,7 +233,7 @@ contains
        
     end do
     
-  end subroutine compute_pseudo_conp
+  end subroutine update_cond_prob
 
   subroutine compute_pseudo_likelihood(it)
     integer, intent(in) :: it
@@ -243,7 +243,7 @@ contains
 
     etot0 = etot
     call model_zero()
-    call compute_pseudo_conp()
+    call update_cond_prob()
     etot = mypl + ereg
     de = etot-etot0
 
