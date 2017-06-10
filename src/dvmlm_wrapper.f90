@@ -73,7 +73,7 @@ contains
     allocate(wa(lwa),stat=err)
     
 
-    call update_gradient(iter)
+    call update_gradient()
     do 
        if(totiter > 100) then 
           write(0,*) 'warning: totiter > 100'
@@ -83,7 +83,7 @@ contains
        if(task(1:2) == 'FG') then 
           ! update etot and gradient for line search
           totiter = totiter + 1
-          call update_gradient(iter)
+          call update_gradient()
        elseif(task(1:4) == 'NEWX') then
           ! start new line search
           iter = iter + 1
@@ -92,7 +92,7 @@ contains
           flush(0)
        elseif(task(1:4) == 'CONV') then 
           ! compute final values for likelihood 
-          call update_gradient(iter)
+          call update_gradient()
           ! put my prms back in fields and couplings arrays 
           call model_put_myv()
           exit

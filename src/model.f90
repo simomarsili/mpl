@@ -219,9 +219,8 @@ contains
     
   end subroutine update_model_averages
 
-  subroutine update_gradient(it)
+  subroutine update_gradient()
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
-    integer, intent(in) :: it
     integer :: dim
     real(kflt) :: etot0,de
 
