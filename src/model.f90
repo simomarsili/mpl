@@ -239,7 +239,7 @@ contains
     integer, intent(in) :: it
     real(kflt) :: etot0,de
 
-    call model_parameters_unpack()
+    call unpack_parameters()
 
     etot0 = etot
     call model_zero()
@@ -271,14 +271,15 @@ contains
 
   end subroutine update_gradient
 
-  subroutine model_parameters_unpack
+  subroutine unpack_parameters()
+    ! unpack field and couplings after updating parameters
 
     my_fields = prm(1:ns) 
     my_couplings = reshape(prm(ns+1:),(/ns,nv,ns/))
     
-  end subroutine model_parameters_unpack
+  end subroutine unpack_parameters
 
-  subroutine model_collect_prm
+  subroutine model_collect_prm()
 
     couplings = 0.5_kflt * couplings
 
