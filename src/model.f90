@@ -253,7 +253,6 @@ contains
 
   subroutine update_gradient()
     integer :: dim
-    real(kflt), parameter :: small_number=1.e-2_kflt
 
     dim = ns*ns*nv
     ! compute the gradient
