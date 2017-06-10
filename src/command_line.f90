@@ -7,7 +7,6 @@ module command_line
   implicit none
   private
   public :: read_args
-  character(2) :: opts(5) = ['-i','-w','-l','-g','-a']
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
   character(1), parameter :: nl=achar(10)
   character(long_string) :: usage = &
@@ -20,17 +19,17 @@ module command_line
        '-i, --input <data_file>                                                                                     '//nl//&
        '    Data file                                                                                               '//nl//&
        nl//&
-       '-l, --lambda <regularization_parameter> - optional                                                          '//nl//&
-       '    Controls regularization strength, defaults to 0.01                                                      '//nl//&
+       '-l, --lambda <regularization_parameter> - float, optional                                                   '//nl//&
+       '    Controls L_2 regularization strength. Default: 0.01                                                     '//nl//&
        nl//&
-       '-w, --reweight <percentage_identity> - optional                                                             '//nl//&
-       '    Percentage identity threshold to be used when reweighting data. Default is no reweight.                 '//nl//&
+       '-w, --reweight <percentage_identity> - float, optional                                                      '//nl//&
+       '    Percentage identity threshold to be used when reweighting data. Default: no reweight.                   '//nl//&
        nl//&
        '-g, --no_gap - optional                                                                                     '//nl//&
        '    Do not take into account state 1 into the calculation of interaction scores.                            '//nl//&
        nl//&
-       '-a, --accuracy <accuracy_level> - optional                                                                  '//nl//&
-       '    Controls thresholds for convergence. Possible values are {0, 1, 2}. Defaults to 1.                      '//nl//&
+       '-a, --accuracy <accuracy_level> - integer, optional                                                         '//nl//&
+       '    Controls thresholds for convergence. Possible values are {0, 1, 2}. Default: 1.                         '//nl//&
        '    Larger values correspond to accurate solutions but slower covergence.                                   '//nl
 
 contains
