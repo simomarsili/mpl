@@ -16,17 +16,16 @@ module model
   public :: model_collect_prm
   public :: compute_pseudo_likelihood
 
-  public :: mypl
+  public :: cond_likelihood
   public :: etot
   public :: fields
   public :: couplings
 
-  ! working variable for the processor
-  integer :: myv 
-  real(kflt), allocatable :: fields(:,:) ! NS x NV
-  real(kflt), allocatable :: couplings(:,:,:) ! NS x NS x NV(NV-1)/2 
-  real(kflt), allocatable :: p1(:,:) ! NS x NV
-  real(kflt), allocatable :: p2(:,:,:) ! NS x NS x NV(NV-1)/2 
+  ! index of outcome variables
+  integer :: myv
+  
+  real(kflt), allocatable :: fields(:,:)      ! fields array (ns x nv)
+  real(kflt), allocatable :: couplings(:,:,:) ! couplings array (ns x ns x nv(nv-1)/2)
 
   ! arrays for fixed residue/sequence
   real(kflt), allocatable, save :: my_fields(:) ! NS
@@ -40,7 +39,7 @@ module model
   real(kflt) :: regularization_strength=0.01_kflt ! regularization strength; the default is l2 with regularization_strength=0.01
 
   ! "cost" functions
-  real(kflt) :: mypl,ereg,etot
+  real(kflt) :: cond_likelihood,ereg,etot
 
   ! gradients arrays
   real(kflt), allocatable, save :: grd(:) ! NS + NS x NV x NS
@@ -54,8 +53,6 @@ contains
 
     regularization_strength = lambda
 
-    allocate(p1(ns,nv),stat=err)
-    allocate(p2(ns,ns,nv*(nv-1)/2),stat=err)
     allocate(fields(ns,nv),stat=err)
     allocate(couplings(ns,ns,nv*(nv-1)/2),stat=err)
     allocate(my_f1(ns),stat=err)
@@ -68,8 +65,6 @@ contains
     allocate(prm(ns + ns*ns*nv),stat=err)
 
 
-    p1 = 0.0_kflt
-    p2 = 0.0_kflt
     fields = 0.0_kflt
     couplings = 0.0_kflt       
 
@@ -79,7 +74,7 @@ contains
     real(kflt), parameter :: small_number=1.e-2_kflt
     my_p1 = 0.0_kflt
     my_p2 = 0.0_kflt
-    mypl = 0.0_kflt
+    cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
     ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_kflt * sum(prm(ns+1:)**2))
   end subroutine model_zero
@@ -100,7 +95,7 @@ contains
     my_f2 = 0.0_kflt
     my_fields = 0.0_kflt
     my_couplings = 0.0_kflt       
-    mypl = 0.0_kflt
+    cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
     ereg = 0.0_kflt
     prm = 0.0_kflt
@@ -217,7 +212,7 @@ contains
        rsum = sum(conp)
        conp = conp / rsum
        
-       mypl = mypl + ww * log(conp(mys))
+       cond_likelihood = cond_likelihood + ww * log(conp(mys))
        
        ! update histograms 
        ! loop over the states of myv 
@@ -244,7 +239,7 @@ contains
     etot0 = etot
     call model_zero()
     call update_cond_prob()
-    etot = mypl + ereg
+    etot = cond_likelihood + ereg
     de = etot-etot0
 
     call update_gradient()
