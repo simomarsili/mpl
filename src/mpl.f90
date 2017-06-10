@@ -4,6 +4,7 @@
 
 program mpl
   use kinds
+  use constants, only: long_string
   use units
   use command_line,  only: read_args
   use data,          only: nv, data_read

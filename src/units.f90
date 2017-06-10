@@ -7,7 +7,6 @@ module units
   private 
   public :: units_initialize
   public :: units_open
-  public :: long_string
   
   integer :: nunits
   integer, parameter :: long_string=10000

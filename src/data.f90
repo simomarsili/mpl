@@ -28,7 +28,7 @@ module data
 contains
 
   subroutine data_initialize(udata)
-    use units, only: long_string
+    use constants, only: long_string
     use parser, only: parser_nfields
     integer(kint), intent(in) :: udata
     integer(kint) :: nfields
@@ -62,7 +62,7 @@ contains
   end subroutine data_initialize
 
   subroutine data_read(udata,w_id)
-    use units, only: long_string
+    use constants, only: long_string
     use parser, only: parser_nfields
     integer(kint), intent(in) :: udata
     real(kflt),     intent(in) :: w_id

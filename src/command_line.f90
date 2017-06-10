@@ -3,7 +3,7 @@
 ! License: BSD 3 clause
 
 module command_line
-  use units
+  use constants, only: long_string
   implicit none
   private
   public :: read_args
@@ -35,7 +35,6 @@ module command_line
 contains
 
   subroutine read_args(data_file,wid,lambda,skip_gaps,accuracy,nerrs)
-    use units, only: long_string
     use kinds
     character(long_string), intent(out) :: data_file
     real(kflt),             intent(out) :: wid
