@@ -247,11 +247,11 @@ contains
     etot = mypl + ereg
     de = etot-etot0
 
-    call model_parameters_pack()
+    call update_gradient()
     
   end subroutine compute_pseudo_likelihood
 
-  subroutine model_parameters_pack
+  subroutine update_gradient()
     integer :: dim
     real(kflt), parameter :: small_number=1.e-2_kflt
 
@@ -264,13 +264,13 @@ contains
     my_p1 = my_p1 + 2.0_kflt * regularization_strength * my_fields
     my_p2 = my_p2 + 2.0_kflt * 0.5_kflt * regularization_strength * my_couplings
 
-    prm(1:ns) = my_fields
-    prm(ns+1:) = reshape(my_couplings,(/dim/))
+    !prm(1:ns) = my_fields
+    !prm(ns+1:) = reshape(my_couplings,(/dim/))
 
     grd(1:ns) = my_p1
     grd(ns+1:) = reshape(my_p2,(/dim/))
 
-  end subroutine model_parameters_pack
+  end subroutine update_gradient
 
   subroutine model_parameters_unpack
 
