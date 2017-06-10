@@ -68,15 +68,6 @@ contains
 
   end subroutine initialize_model
 
-  subroutine reset_cost()
-    real(kflt), parameter :: small_number=1.e-2_kflt
-    model_f1 = 0.0_kflt
-    model_f2 = 0.0_kflt
-    cond_likelihood = 0.0_kflt
-    etot = 0.0_kflt
-    ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_kflt * sum(prm(ns+1:)**2))
-  end subroutine reset_cost
-
   subroutine model_set_myv(iv,err) ! vcouplings
     use data, only: nd,data_samples,w
     integer, intent(in) :: iv
@@ -234,11 +225,24 @@ contains
 
     call unpack_parameters()
 
+    ! save old cost function value
     etot0 = etot
-    call reset_cost()
+    
+    ! reset averages and cost before looping over data samples
+    model_f1 = 0.0_kflt
+    model_f2 = 0.0_kflt
+    cond_likelihood = 0.0_kflt
+    etot = 0.0_kflt
+    ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_kflt * sum(prm(ns+1:)**2))
+
+    ! take averages over model distribution
     call update_cond_prob()
+
+    ! add regularization term to conditional likelihood
     etot = cond_likelihood + ereg
-    de = etot-etot0
+
+    ! delta cost 
+    de = etot - etot0
 
     call update_gradient()
     
