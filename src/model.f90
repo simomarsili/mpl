@@ -220,7 +220,9 @@ contains
   end subroutine update_cond_prob
 
   subroutine update_cost_function(it)
+    ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
     integer, intent(in) :: it
+    integer :: dim
     real(kflt) :: etot0,de
 
     call unpack_parameters()
@@ -244,29 +246,15 @@ contains
     ! delta cost 
     de = etot - etot0
 
-    call update_gradient()
-    
-  end subroutine update_cost_function
-
-  subroutine update_gradient()
-    integer :: dim
+    ! update gradient 
+    model_f1 = model_f1 - data_f1 + 2.0_kflt * regularization_strength * vfields
+    model_f2 = model_f2 - data_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * vcouplings
 
     dim = ns*ns*nv
-    ! compute the gradient
-    model_f1 = model_f1 - data_f1 
-    model_f2 = model_f2 - data_f2 
-
-    ! l2 regularization
-    model_f1 = model_f1 + 2.0_kflt * regularization_strength * vfields
-    model_f2 = model_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * vcouplings
-
-    !prm(1:ns) = vfields
-    !prm(ns+1:) = reshape(vcouplings,(/dim/))
-
     grd(1:ns) = model_f1
     grd(ns+1:) = reshape(model_f2,(/dim/))
-
-  end subroutine update_gradient
+    
+  end subroutine update_cost_function
 
   subroutine unpack_parameters()
     ! unpack field and couplings after updating parameters
