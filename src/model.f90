@@ -13,7 +13,7 @@ module model
   public :: model_set_myv
   public :: model_put_myv
   public :: model_collect_prm
-  public :: update_cost_function
+  public :: update_gradient
   public :: cond_likelihood
   public :: etot
   public :: fields
@@ -125,7 +125,7 @@ contains
     ! lower triangle packing: jv > out_var
 
     ! remove gauge before adding to couplings
-    call model_gauge()
+    call fix_gauge()
 
     fields(:,out_var) = vfields
     do jv = out_var+1,nv ! jv > out_var
@@ -140,7 +140,7 @@ contains
 
   end subroutine model_put_myv
 
-  subroutine model_gauge
+  subroutine fix_gauge
     integer :: jv,is,js
     real(kflt) :: mat(ns,ns),arr(ns),marr
     real(kflt) :: rsum(ns),csum(ns),totsum
@@ -168,7 +168,7 @@ contains
     end do
     vfields = arr
     
-  end subroutine model_gauge
+  end subroutine fix_gauge
 
   subroutine update_model_averages()
     use data, only: data_samples,w,nd
@@ -219,7 +219,7 @@ contains
     
   end subroutine update_model_averages
 
-  subroutine update_cost_function(it)
+  subroutine update_gradient(it)
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
     integer, intent(in) :: it
     integer :: dim
@@ -254,7 +254,7 @@ contains
     grd(1:ns) = model_f1
     grd(ns+1:) = reshape(model_f2,(/dim/))
     
-  end subroutine update_cost_function
+  end subroutine update_gradient
 
   subroutine unpack_parameters()
     ! unpack field and couplings after updating parameters
