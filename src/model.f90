@@ -13,7 +13,7 @@ module model
   public :: model_set_myv
   public :: model_put_myv
   public :: model_collect_prm
-  public :: compute_pseudo_likelihood
+  public :: update_cost_function
   public :: cond_likelihood
   public :: etot
   public :: fields
@@ -219,7 +219,7 @@ contains
     
   end subroutine update_cond_prob
 
-  subroutine compute_pseudo_likelihood(it)
+  subroutine update_cost_function(it)
     integer, intent(in) :: it
     real(kflt) :: etot0,de
 
@@ -246,7 +246,7 @@ contains
 
     call update_gradient()
     
-  end subroutine compute_pseudo_likelihood
+  end subroutine update_cost_function
 
   subroutine update_gradient()
     integer :: dim
