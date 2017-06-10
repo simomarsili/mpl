@@ -8,7 +8,7 @@ program mpl
   use units
   use command_line,  only: read_args
   use data,          only: nv, data_read
-  use model,         only: model_initialize, model_set_myv, model_collect_prm
+  use model,         only: initialize_model, model_set_myv, model_collect_prm
   use scrs,          only: compute_scores, print_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
@@ -50,7 +50,7 @@ program mpl
   call data_read(udata,w_id)
 
   write(0,*) 'initialize...'
-  call model_initialize(lambda)
+  call initialize_model(lambda)
 
   write(0,*) 'minimize...'
   call cpu_time(start_min)

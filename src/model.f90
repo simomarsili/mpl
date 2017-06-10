@@ -9,7 +9,7 @@ module model
   private
 
   public :: prm,grd
-  public :: model_initialize
+  public :: initialize_model
   public :: model_set_myv
   public :: model_put_myv
   public :: model_collect_prm
@@ -45,7 +45,7 @@ module model
 
 contains
 
-  subroutine model_initialize(lambda)
+  subroutine initialize_model(lambda)
     real(kflt), intent(in) :: lambda
     integer :: err
 
@@ -66,7 +66,7 @@ contains
     fields = 0.0_kflt
     couplings = 0.0_kflt       
 
-  end subroutine model_initialize
+  end subroutine initialize_model
 
   subroutine model_zero()
     real(kflt), parameter :: small_number=1.e-2_kflt
