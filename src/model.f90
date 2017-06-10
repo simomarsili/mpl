@@ -170,7 +170,7 @@ contains
     
   end subroutine model_gauge
 
-  subroutine update_cond_prob()
+  subroutine update_model_averages()
     use data, only: data_samples,w,nd
     integer :: list(nv)
     real(kflt) :: conp(ns)
@@ -217,7 +217,7 @@ contains
        
     end do
     
-  end subroutine update_cond_prob
+  end subroutine update_model_averages
 
   subroutine update_cost_function(it)
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
@@ -238,7 +238,7 @@ contains
     ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_kflt * sum(prm(ns+1:)**2))
 
     ! take averages over model distribution
-    call update_cond_prob()
+    call update_model_averages()
 
     ! add regularization term to conditional likelihood
     etot = cond_likelihood + ereg
