@@ -51,6 +51,10 @@ contains
 
     call get_command(cmd)
     nargs = command_argument_count()
+    if (nargs == 0) then
+       write(0,'(a)') trim(usage)
+       stop
+    end if
 
     iarg = 1
     nerrs = 0
