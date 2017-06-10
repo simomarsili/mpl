@@ -68,14 +68,14 @@ contains
 
   end subroutine initialize_model
 
-  subroutine model_zero()
+  subroutine reset_cost()
     real(kflt), parameter :: small_number=1.e-2_kflt
     model_f1 = 0.0_kflt
     model_f2 = 0.0_kflt
     cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
     ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_kflt * sum(prm(ns+1:)**2))
-  end subroutine model_zero
+  end subroutine reset_cost
 
   subroutine model_set_myv(iv,err) ! vcouplings
     use data, only: nd,data_samples,w
@@ -235,7 +235,7 @@ contains
     call unpack_parameters()
 
     etot0 = etot
-    call model_zero()
+    call reset_cost()
     call update_cond_prob()
     etot = cond_likelihood + ereg
     de = etot-etot0
