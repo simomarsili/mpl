@@ -3,10 +3,35 @@
 ! License: BSD 3 clause
 
 module command_line
+  use units
   implicit none
   private
   public :: read_args
   character(2) :: opts(5) = ['-i','-w','-l','-g','-a']
+  character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
+  character(1), parameter :: nl=achar(10)
+  character(long_string) :: usage = &
+       'SYNTAX'//nl//&
+       nl//&
+       '    mpl -i <data_file> [-l <regularization_parameter>] [-w <percentage_identity>] [-g] [-a <accuracy_level>]'//nl//&
+       '    mpl -h                                                                                                  '//nl//&
+       nl//&
+       'OPTIONS'//nl//&
+       '-i, --input <data_file>                                                                                     '//nl//&
+       '    Data file                                                                                               '//nl//&
+       nl//&
+       '-l, --lambda <regularization_parameter> - optional                                                          '//nl//&
+       '    Controls regularization strength, defaults to 0.01                                                      '//nl//&
+       nl//&
+       '-w, --reweight <percentage_identity> - optional                                                             '//nl//&
+       '    Percentage identity threshold to be used when reweighting data. Default is no reweight.                 '//nl//&
+       nl//&
+       '-g, --no_gap - optional                                                                                     '//nl//&
+       '    Do not take into account state 1 into the calculation of interaction scores.                            '//nl//&
+       nl//&
+       '-a, --accuracy <accuracy_level> - optional                                                                  '//nl//&
+       '    Controls thresholds for convergence. Possible values are {0, 1, 2}. Defaults to 1.                      '//nl//&
+       '    Larger values correspond to accurate solutions but slower covergence.                                   '//nl
 
 contains
 
@@ -26,7 +51,6 @@ contains
 
     call get_command(cmd)
     nargs = command_argument_count()
-    write(0,*) trim(cmd)
 
     iarg = 1
     nerrs = 0
@@ -37,53 +61,54 @@ contains
     accuracy = 1
     do while(iarg <= nargs)
        call get_command_argument(iarg,arg)
-       if (any(opts == trim(arg))) then
-          select case(trim(arg))
-          case('-i')
-             ! input file
-             iarg = iarg + 1
-             call get_command_argument(iarg,arg)
-             data_file = arg
-             if(len_trim(data_file) == 0) then
-                nerrs = nerrs + 1
-                write(0,*) 'error: check data file'
-             end if
-             if(data_file(1:1) == '-') then
-                nerrs = nerrs + 1
-                write(0,*) 'error: check data file'
-             end if
-          case('-w')
-             iarg = iarg + 1
-             call get_command_argument(iarg,arg)
-             read(arg,*,iostat=err) wid
-             if ( err/=0 ) then
-                write(0,*) "error ! check %id (reweight)"
-                nerrs = nerrs + 1
-             end if
-          case('-l')
-             iarg = iarg + 1
-             call get_command_argument(iarg,arg)
-             read(arg,*,iostat=err) lambda
-             if ( err/=0 ) then
-                write(0,*) "error ! check lambda"
-                nerrs = nerrs + 1
-             end if
-          case('-g')
-             ! remove contrib. from state 1 to the final scores
-             skip_gaps = .true.
-          case('-a')
-             iarg = iarg + 1
-             call get_command_argument(iarg,arg)
-             read(arg,*,iostat=err) accuracy
-             if ( err/=0 ) then
-                write(0,*) "error ! check accuracy"
-                nerrs = nerrs + 1
-             end if
-          end select
-       else
+       select case(trim(arg))
+       case('-h')
+          write(0,'(a)') trim(usage)
+          stop
+       case('-i','--input')
+          ! input file
+          iarg = iarg + 1
+          call get_command_argument(iarg,arg)
+          data_file = arg
+          if(len_trim(data_file) == 0) then
+             nerrs = nerrs + 1
+             write(0,*) 'error: check data file'
+          end if
+          if(data_file(1:1) == '-') then
+             nerrs = nerrs + 1
+             write(0,*) 'error: check data file'
+          end if
+       case('-w','--reweight')
+          iarg = iarg + 1
+          call get_command_argument(iarg,arg)
+          read(arg,*,iostat=err) wid
+          if ( err/=0 ) then
+             write(0,*) "error ! check %id (reweight)"
+             nerrs = nerrs + 1
+          end if
+       case('-l','--lambda')
+          iarg = iarg + 1
+          call get_command_argument(iarg,arg)
+          read(arg,*,iostat=err) lambda
+          if ( err/=0 ) then
+             write(0,*) "error ! check lambda"
+             nerrs = nerrs + 1
+          end if
+       case('-g','--no_gap')
+          ! remove contrib. from state 1 to the final scores
+          skip_gaps = .true.
+       case('-a','--accuracy')
+          iarg = iarg + 1
+          call get_command_argument(iarg,arg)
+          read(arg,*,iostat=err) accuracy
+          if ( err/=0 ) then
+             write(0,*) "error ! check accuracy"
+             nerrs = nerrs + 1
+          end if
+       case default
           write(0,'(a,1x,a)') 'error: unknown option',trim(arg)
-          nerrs = nerrs + 1
-       end if
+          nerrs = nerrs + 1             
+       end select
        iarg = iarg + 1
     end do
 
