@@ -14,9 +14,10 @@ module dvmlm_wrapper
 
 contains
 
-  subroutine dvmlm_min(prm,grd,accuracy,ndim,mstep,task,wa)
-    real(kflt), intent(inout) :: prm(:)
-    real(kflt), intent(inout) :: grd(:)
+  subroutine dvmlm_min(prm,grd,dim,accuracy,ndim,mstep,task,wa)
+    integer :: dim
+    real(kflt), intent(inout) :: prm(dim)
+    real(kflt), intent(inout) :: grd(dim)
     integer,       intent(in) :: accuracy,ndim,mstep
     character(60), intent(inout) :: task
     real(kflt),    intent(in) :: wa(:)
@@ -55,10 +56,11 @@ contains
 
   end subroutine dvmlm_min
 
-  subroutine dvmlm_minimize(prm,grd,accuracy,iter,totiter)
+  subroutine dvmlm_minimize(prm,grd,dim,accuracy,iter,totiter)
     use model, only: update_gradient, model_put_myv
-    real(kflt), intent(inout) :: prm(:)
-    real(kflt), intent(inout) :: grd(:)
+    integer, intent(in) :: dim
+    real(kflt), intent(inout) :: prm(dim)
+    real(kflt), intent(inout) :: grd(dim)
     integer, intent(in) :: accuracy
     integer, intent(out) :: iter,totiter
     integer :: err
@@ -84,7 +86,7 @@ contains
           write(0,*) 'warning: totiter > 100'
           flush(0)
        end if
-       call dvmlm_min(prm,grd,accuracy,ndim,mstep,task,wa)
+       call dvmlm_min(prm,grd,size(prm),accuracy,ndim,mstep,task,wa)
        if(task(1:2) == 'FG') then 
           ! update etot and gradient for line search
           totiter = totiter + 1
