@@ -1,5 +1,6 @@
-! Copyright (C) 2015, 2016, Simone Marsili 
+! Copyright (C) 2015-2017, Simone Marsili 
 ! All rights reserved.
+! License: BSD 3 clause
 ! License: BSD 3 clause
 
 module dvmlm_wrapper
@@ -53,7 +54,7 @@ contains
   end subroutine dvmlm_min
 
   subroutine dvmlm_minimize(accuracy,iter,totiter)
-    use model, only: compute_pseudo_likelihood, model_put_myv
+    use model, only: update_gradient, model_put_myv
     integer, intent(in) :: accuracy
     integer, intent(out) :: iter,totiter
     integer :: err
@@ -73,7 +74,7 @@ contains
     allocate(wa(lwa),stat=err)
     
 
-    call compute_pseudo_likelihood(iter)
+    call update_gradient()
     do 
        if(totiter > 100) then 
           write(0,*) 'warning: totiter > 100'
@@ -83,7 +84,7 @@ contains
        if(task(1:2) == 'FG') then 
           ! update etot and gradient for line search
           totiter = totiter + 1
-          call compute_pseudo_likelihood(iter)
+          call update_gradient()
        elseif(task(1:4) == 'NEWX') then
           ! start new line search
           iter = iter + 1
@@ -92,7 +93,7 @@ contains
           flush(0)
        elseif(task(1:4) == 'CONV') then 
           ! compute final values for likelihood 
-          call compute_pseudo_likelihood(iter)
+          call update_gradient()
           ! put my prms back in fields and couplings arrays 
           call model_put_myv()
           exit
