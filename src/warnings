@@ -1,0 +1,9 @@
+dvmlm.f:1286:72: Warning: Deleted feature: ASSIGN statement at (1)
+dvmlm.f:1291:19:
+
+    20    go to next,(30, 50, 70, 110)
+                   1
+Warning: Deleted feature: Assigned GOTO statement at (1)
+dvmlm.f:1293:72: Warning: Deleted feature: ASSIGN statement at (1)
+dvmlm.f:1302:72: Warning: Deleted feature: ASSIGN statement at (1)
+dvmlm.f:1309:72: Warning: Deleted feature: ASSIGN statement at (1)

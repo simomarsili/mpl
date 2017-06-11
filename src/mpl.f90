@@ -8,7 +8,7 @@ program mpl
   use constants,     only: long_string
   use units
   use command_line,  only: read_args
-  use data,          only: nv, data_read
+  use data,          only: nd,nv,ns,data_read
   use model,         only: initialize_model, model_set_myv, model_collect_prm
   use scrs,          only: compute_scores, print_scores
   use dvmlm_wrapper, only: dvmlm_minimize
@@ -24,7 +24,8 @@ program mpl
   integer                :: niter,neval
   real(kflt_single)      :: finish,start,start_min,end_min
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
-  
+  real(kflt), allocatable :: prm(:) ! 1D array of parameters (ns + ns x nv x ns)
+  real(kflt), allocatable :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
 
   call units_initialize()
 
@@ -51,16 +52,19 @@ program mpl
   call data_read(udata,w_id)
 
   write(0,*) 'initialize...'
+  ! allocate parameters and gradient
+  allocate(prm(ns + ns*ns*nv),stat=err)
+  allocate(grd(ns + ns*ns*nv),stat=err)
   call initialize_model(lambda)
 
   write(0,*) 'minimize...'
   call cpu_time(start_min)
   ! loop over features
   do iv = 1,nv
-     call model_set_myv(iv,err)
+     call model_set_myv(iv,prm,grd,err)
      niter = 0
      call cpu_time(start)
-     call dvmlm_minimize(accuracy,niter,neval)
+     call dvmlm_minimize(prm,grd,accuracy,niter,neval)
      call cpu_time(finish)
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
@@ -73,5 +77,7 @@ program mpl
   call model_collect_prm()
   call compute_scores(skip_gaps)
   call print_scores(uscrs)
+
+  deallocate(prm,grd)
 
 end program mpl

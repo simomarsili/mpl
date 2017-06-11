@@ -9,7 +9,6 @@ module model
   implicit none
   private
 
-  public :: prm,grd
   public :: initialize_model
   public :: model_set_myv
   public :: model_put_myv
@@ -40,10 +39,6 @@ module model
   ! "cost" function-related variables
   real(kflt) :: cond_likelihood,ereg,etot
 
-  ! parameters and gradients 1D arrays for the optimization routines
-  real(kflt), allocatable, save :: prm(:) ! 1D array of parameters (ns + ns x nv x ns)
-  real(kflt), allocatable, save :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
-
 contains
 
   subroutine initialize_model(lambda)
@@ -60,18 +55,17 @@ contains
     allocate(vcouplings(ns,nv,ns),stat=err)
     allocate(model_f1(ns),stat=err)
     allocate(model_f2(ns,nv,ns),stat=err)
-    allocate(grd(ns + ns*ns*nv),stat=err)
-    allocate(prm(ns + ns*ns*nv),stat=err)
-
 
     fields = 0.0_kflt
     couplings = 0.0_kflt       
 
   end subroutine initialize_model
 
-  subroutine model_set_myv(iv,err) ! vcouplings
+  subroutine model_set_myv(iv,prm,grd,err) ! vcouplings
     use data, only: nd,data_samples,w
     integer, intent(in) :: iv
+    real(kflt), intent(out) :: prm(:)
+    real(kflt), intent(out) :: grd(:)
     ! make vcouplings given out_var 
     ! must be called before looping on data
     integer :: id,jv,mys
@@ -220,12 +214,14 @@ contains
     
   end subroutine update_model_averages
 
-  subroutine update_gradient()
+  subroutine update_gradient(prm,grd)
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
+    real(kflt), intent(in) :: prm(:)
+    real(kflt), intent(out) :: grd(:)
     integer :: dim
     real(kflt) :: etot0,de
 
-    call unpack_parameters()
+    call unpack_parameters(prm)
 
     ! save old cost function value
     etot0 = etot
@@ -256,8 +252,9 @@ contains
     
   end subroutine update_gradient
 
-  subroutine unpack_parameters()
+  subroutine unpack_parameters(prm)
     ! unpack field and couplings after updating parameters
+    real(kflt), intent(in) :: prm(:)
 
     vfields = prm(1:ns) 
     vcouplings = reshape(prm(ns+1:),(/ns,nv,ns/))

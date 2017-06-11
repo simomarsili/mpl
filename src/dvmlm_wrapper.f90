@@ -5,7 +5,7 @@
 
 module dvmlm_wrapper
   use kinds
-  use model, only: prm, grd, etot
+  use model, only: etot
   ! wrapper to dvmlm subroutine 
   implicit none
   private 
@@ -14,7 +14,9 @@ module dvmlm_wrapper
 
 contains
 
-  subroutine dvmlm_min(accuracy,ndim,mstep,task,wa)
+  subroutine dvmlm_min(prm,grd,accuracy,ndim,mstep,task,wa)
+    real(kflt), intent(inout) :: prm(:)
+    real(kflt), intent(inout) :: grd(:)
     integer,       intent(in) :: accuracy,ndim,mstep
     character(60), intent(inout) :: task
     real(kflt),    intent(in) :: wa(:)
@@ -53,8 +55,10 @@ contains
 
   end subroutine dvmlm_min
 
-  subroutine dvmlm_minimize(accuracy,iter,totiter)
+  subroutine dvmlm_minimize(prm,grd,accuracy,iter,totiter)
     use model, only: update_gradient, model_put_myv
+    real(kflt), intent(inout) :: prm(:)
+    real(kflt), intent(inout) :: grd(:)
     integer, intent(in) :: accuracy
     integer, intent(out) :: iter,totiter
     integer :: err
@@ -74,17 +78,17 @@ contains
     allocate(wa(lwa),stat=err)
     
 
-    call update_gradient()
+    call update_gradient(prm,grd)
     do 
        if(totiter > 100) then 
           write(0,*) 'warning: totiter > 100'
           flush(0)
        end if
-       call dvmlm_min(accuracy,ndim,mstep,task,wa)
+       call dvmlm_min(prm,grd,accuracy,ndim,mstep,task,wa)
        if(task(1:2) == 'FG') then 
           ! update etot and gradient for line search
           totiter = totiter + 1
-          call update_gradient()
+          call update_gradient(prm,grd)
        elseif(task(1:4) == 'NEWX') then
           ! start new line search
           iter = iter + 1
@@ -93,7 +97,7 @@ contains
           flush(0)
        elseif(task(1:4) == 'CONV') then 
           ! compute final values for likelihood 
-          call update_gradient()
+          call update_gradient(prm,grd)
           ! put my prms back in fields and couplings arrays 
           call model_put_myv()
           exit
