@@ -40,9 +40,9 @@ contains
     regularization_strength = lambda
 
     allocate(data_f1(ns),stat=err)
-    allocate(data_f2(ns,nv,ns),stat=err)
+    allocate(data_f2(ns,ns,nv),stat=err)
     allocate(model_f1(ns),stat=err)
-    allocate(model_f2(ns,nv,ns),stat=err)
+    allocate(model_f2(ns,ns,nv),stat=err)
 
   end subroutine initialize_model
 
@@ -78,7 +78,7 @@ contains
        data_f1(mys) = data_f1(mys) + w(id)
        do jv = 1,nv
           if(jv /= out_var) then 
-             data_f2(list(jv),jv,mys) = data_f2(list(jv),jv,mys) + w(id)
+             data_f2(list(jv),mys,jv) = data_f2(list(jv),mys,jv) + w(id)
           end if
        end do
     end do
@@ -89,7 +89,7 @@ contains
   subroutine fix_gauge(nv1,ns1,fields,couplings)
     integer, intent(in) :: nv1,ns1
     real(kflt), intent(inout) :: fields(ns1)
-    real(kflt), intent(inout) :: couplings(ns1,nv1,ns1)
+    real(kflt), intent(inout) :: couplings(ns1,ns1,nv1)
     integer :: jv,is,js
     real(kflt) :: mat(ns,ns),arr(ns),marr
     real(kflt) :: rsum(ns),csum(ns),totsum
@@ -98,7 +98,7 @@ contains
     marr = sum(arr) / real(ns)
     arr = arr - marr
     do jv = 1,nv
-       mat = couplings(:,jv,:)
+       mat = couplings(:,:,jv)
        totsum = sum(mat)
        totsum = totsum / real(ns*ns)
        do is = 1,ns
@@ -113,7 +113,7 @@ contains
              mat(is,js) = mat(is,js) - rsum(is) - csum(js) + totsum
           end do
        end do
-       couplings(:,jv,:) = mat
+       couplings(:,:,jv) = mat
     end do
     fields = arr
     
@@ -123,7 +123,7 @@ contains
     use data, only: data_samples,w,nd
     integer, intent(in) :: nv1,ns1
     real(kflt), intent(in) :: fields(ns1)
-    real(kflt), intent(in) :: couplings(ns1,nv1,ns1)
+    real(kflt), intent(in) :: couplings(ns1,ns1,nv1)
     integer :: list(nv)
     real(kflt) :: conp(ns)
     real(kflt) :: r,rsum
@@ -139,15 +139,15 @@ contains
        ww = w(id)
        mys = list(out_var)
        
-       ! loop over the states of out_var 
-       do is = 1,ns
-          r = fields(is) 
-          do jv = 1,nv
+       ! loop over the states of out_var
+       do jv = 1,nv
+          do is = 1,ns
+             r = fields(is) 
              if(out_var /= jv) then 
                 r = r + couplings(list(jv),jv,is) 
              end if
+             conp(is) = exp(r)
           end do
-          conp(is) = exp(r)
        end do
        
        rsum = sum(conp)
@@ -162,7 +162,7 @@ contains
           model_f1(is) = model_f1(is) + pp 
           do jv = 1,nv
              if(out_var /= jv) then 
-                model_f2(list(jv),jv,is) = model_f2(list(jv),jv,is) + pp
+                model_f2(list(jv),js,jv) = model_f2(list(jv),js,jv) + pp
              end if
           end do
        end do
@@ -175,9 +175,9 @@ contains
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
     integer, intent(in) :: nv1,ns1
     real(kflt), intent(in) :: fields(ns1)
-    real(kflt), intent(in) :: couplings(ns1,nv1,ns1)
+    real(kflt), intent(in) :: couplings(ns1,ns1,nv1)
     real(kflt), intent(out) :: grd1(ns1)
-    real(kflt), intent(out) :: grd2(ns1,nv1,ns1)
+    real(kflt), intent(out) :: grd2(ns1,ns1,nv1)
     real(kflt) :: etot0,de
 
     ! save old cost function value
