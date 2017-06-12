@@ -5,6 +5,7 @@
 
 module dvmlm_wrapper
   use kinds
+  use data, only: nv,ns 
   use model, only: etot
   ! wrapper to dvmlm subroutine 
   implicit none
@@ -79,8 +80,7 @@ contains
     lwa = 2*ndim*mstep + 2*ndim + mstep
     allocate(wa(lwa),stat=err)
     
-
-    call update_gradient(prm,grd)
+    call update_gradient(nv,ns,prm(:ns),prm(ns+1),grd(:ns),grd(ns+1:))
     do 
        if(totiter > 100) then 
           write(0,*) 'warning: totiter > 100'
@@ -90,7 +90,7 @@ contains
        if(task(1:2) == 'FG') then 
           ! update etot and gradient for line search
           totiter = totiter + 1
-          call update_gradient(prm,grd)
+          call update_gradient(nv,ns,prm(:ns),prm(ns+1),grd(:ns),grd(ns+1:))
        elseif(task(1:4) == 'NEWX') then
           ! start new line search
           iter = iter + 1
@@ -98,10 +98,10 @@ contains
           write(0,*) 'warning ', iter
           flush(0)
        elseif(task(1:4) == 'CONV') then 
-          ! compute final values for likelihood 
-          call update_gradient(prm,grd)
+          ! compute final values for likelihood
+          call update_gradient(nv,ns,prm(:ns),prm(ns+1),grd(:ns),grd(ns+1:))
           ! put my prms back in fields and couplings arrays 
-          call model_put_myv()
+          call model_put_myv(nv,ns,prm(:ns),prm(ns+1))
           exit
        end if
     end do

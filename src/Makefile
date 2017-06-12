@@ -28,7 +28,7 @@ units.o: units.f90
 command_line.o: command_line.f90 kinds.o constants.o units.o 
 data.o: data.f90 kinds.o constants.o kinds.o parser.o
 model.o: model.f90 kinds.o data.o 
-dvmlm_wrapper.o: dvmlm_wrapper.f90 dvmlm.o model.o kinds.o
+dvmlm_wrapper.o: dvmlm_wrapper.f90 dvmlm.o model.o data.o kinds.o
 scrs.o: scrs.f90 kinds.o data.o model.o units.o
 mpl.o: mpl.f90 kinds.o constants.o units.o parser.o command_line.o data.o model.o scrs.o dvmlm_wrapper.o 
 

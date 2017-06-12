@@ -26,8 +26,6 @@ module model
   real(kflt), allocatable :: couplings(:,:,:) ! couplings (ns x ns x nv(nv-1)/2)
 
   ! arrays for fixed residue/sequence
-  real(kflt), allocatable, save :: vfields(:)        ! out_var fields array (ns)
-  real(kflt), allocatable, save :: vcouplings(:,:,:) ! out_var couplings (ns x nv x ns)
   real(kflt), allocatable, save :: model_f1(:)       ! model single-variable frequencies (ns)
   real(kflt), allocatable, save :: model_f2(:,:,:)   ! model frequencies for pairs of variables (ns x nv x ns)
   real(kflt), allocatable, save :: data_f1(:)        ! data single-variable frequencies (ns)
@@ -51,8 +49,6 @@ contains
     allocate(couplings(ns,ns,nv*(nv-1)/2),stat=err)
     allocate(data_f1(ns),stat=err)
     allocate(data_f2(ns,nv,ns),stat=err)
-    allocate(vfields(ns),stat=err)
-    allocate(vcouplings(ns,nv,ns),stat=err)
     allocate(model_f1(ns),stat=err)
     allocate(model_f2(ns,nv,ns),stat=err)
 
@@ -77,8 +73,6 @@ contains
     model_f2 = 0.0_kflt
     data_f1 = 0.0_kflt
     data_f2 = 0.0_kflt
-    vfields = 0.0_kflt
-    vcouplings = 0.0_kflt       
     cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
     ereg = 0.0_kflt
@@ -103,7 +97,11 @@ contains
 
   end subroutine model_set_myv
 
-  subroutine model_put_myv 
+  subroutine model_put_myv(nv1,ns1,vfields,vcouplings)
+    integer, intent(in) :: nv1,ns1
+    real(kflt), intent(inout) :: vfields(ns1)
+    real(kflt), intent(inout) :: vcouplings(ns1,nv1,ns1)
+
     ! store vfields in fields 
     ! store vcouplings in couplings
     ! must be called before looping on data
@@ -120,7 +118,7 @@ contains
     ! lower triangle packing: jv > out_var
 
     ! remove gauge before adding to couplings
-    call fix_gauge()
+    call fix_gauge(nv1,ns1,vfields,vcouplings)
 
     fields(:,out_var) = vfields
     do jv = out_var+1,nv ! jv > out_var
@@ -135,7 +133,10 @@ contains
 
   end subroutine model_put_myv
 
-  subroutine fix_gauge
+  subroutine fix_gauge(nv1,ns1,vfields,vcouplings)
+    integer, intent(in) :: nv1,ns1
+    real(kflt), intent(inout) :: vfields(ns1)
+    real(kflt), intent(inout) :: vcouplings(ns1,nv1,ns1)
     integer :: jv,is,js
     real(kflt) :: mat(ns,ns),arr(ns),marr
     real(kflt) :: rsum(ns),csum(ns),totsum
@@ -165,8 +166,11 @@ contains
     
   end subroutine fix_gauge
 
-  subroutine update_model_averages()
+  subroutine update_model_averages(nv1,ns1,vfields,vcouplings)
     use data, only: data_samples,w,nd
+    integer, intent(in) :: nv1,ns1
+    real(kflt), intent(in) :: vfields(ns1)
+    real(kflt), intent(in) :: vcouplings(ns1,nv1,ns1)
     integer :: list(nv)
     real(kflt) :: conp(ns)
     real(kflt) :: r,rsum
@@ -214,14 +218,14 @@ contains
     
   end subroutine update_model_averages
 
-  subroutine update_gradient(prm,grd)
+  subroutine update_gradient(nv1,ns1,vfields,vcouplings,grd1,grd2)
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
-    real(kflt), intent(in) :: prm(:)
-    real(kflt), intent(out) :: grd(:)
-    integer :: dim
+    integer, intent(in) :: nv1,ns1
+    real(kflt), intent(in) :: vfields(ns1)
+    real(kflt), intent(in) :: vcouplings(ns1,nv1,ns1)
+    real(kflt), intent(out) :: grd1(ns1)
+    real(kflt), intent(out) :: grd2(ns1,nv1,ns1)
     real(kflt) :: etot0,de
-
-    call unpack_parameters(prm)
 
     ! save old cost function value
     etot0 = etot
@@ -231,10 +235,10 @@ contains
     model_f2 = 0.0_kflt
     cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
-    ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_kflt * sum(prm(ns+1:)**2))
+    ereg = - regularization_strength * (sum(vfields**2) + 0.5_kflt * sum(vcouplings**2))
 
     ! take averages over model distribution
-    call update_model_averages()
+    call update_model_averages(nv1,ns1,vfields,vcouplings)
 
     ! add regularization term to conditional likelihood
     etot = cond_likelihood + ereg
@@ -243,23 +247,10 @@ contains
     de = etot - etot0
 
     ! update gradient 
-    model_f1 = model_f1 - data_f1 + 2.0_kflt * regularization_strength * vfields
-    model_f2 = model_f2 - data_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * vcouplings
-
-    dim = ns*ns*nv
-    grd(1:ns) = model_f1
-    grd(ns+1:) = reshape(model_f2,(/dim/))
+    grd1 = model_f1 - data_f1 + 2.0_kflt * regularization_strength * vfields
+    grd2 = model_f2 - data_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * vcouplings
     
   end subroutine update_gradient
-
-  subroutine unpack_parameters(prm)
-    ! unpack field and couplings after updating parameters
-    real(kflt), intent(in) :: prm(:)
-
-    vfields = prm(1:ns) 
-    vcouplings = reshape(prm(ns+1:),(/ns,nv,ns/))
-    
-  end subroutine unpack_parameters
 
   subroutine model_collect_prm()
 
