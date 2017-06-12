@@ -8,12 +8,20 @@ module scrs
   implicit none
   private
 
-  public :: compute_scores2
+  public :: compute_scores
   public :: print_scores
 
   real(kflt), allocatable, save :: scores(:,:)
 
 contains
+
+  pure integer function kmap(v2,a1,a2) result(k)
+    ! returns the index of element (b,v,a,u) in prm
+    use data, only: nv,ns
+    implicit none
+    integer, intent(in) :: v2,a1,a2
+    k = ns + (a1 - 1) * ns*nv + (v2 - 1) * ns + a2
+  end function kmap
 
   real(kflt) function frobenius(a)
     real(kflt), intent(in) :: a(:,:)
@@ -49,43 +57,41 @@ contains
 
   end subroutine apc_correction
 
-  subroutine compute_scores2(nv,ns,coups,skip_gaps)
+  subroutine compute_scores(nv,ns,prm,skip_gaps,symmetrize)
+    ! compute scores (no temporary array)
     integer, intent(in) :: nv,ns
-    real(kflt), intent(in) :: coups(ns,nv,ns,nv)
-    logical, intent(in) :: skip_gaps
+    real(kflt), intent(in) :: prm(:,:)
+    logical, intent(in) :: skip_gaps,symmetrize
     integer :: iv,jv,is,js,k
     integer :: err
-    real(kflt) :: fuffa
+    real(kflt) :: prmm
 
     ! at the very end of the run
     allocate(scores(nv,nv),stat=err)
     scores = 0.0_kflt
 
-    do jv = 1,nv-1
-       do iv = jv+1,nv
-          fuffa = 0.0_kflt
-          if (skip_gaps) then
-             do js = 2,ns
-                do is = 2,ns
-                   fuffa = fuffa + (coups(is,iv,js,jv) + coups(js,jv,is,iv))**2
-                end do
-             end do
-          else
+    do iv = 1,nv
+       k = ns
+       do is = 1,ns
+          do jv = 1,nv
              do js = 1,ns
-                do is = 1,ns
-                   fuffa = fuffa + (coups(is,iv,js,jv) + coups(js,jv,is,iv))**2
-                end do
+                k = k + 1
+                if (skip_gaps .and. (is == 1 .or. js == 1)) cycle
+                if (symmetrize) then 
+                   prmm = prm(k,iv) + prm(kmap(iv,js,is),jv)
+                else
+                   prmm = prm(k,iv)
+                end if
+                scores(iv,jv) = scores(iv,jv) + prmm**2
              end do
-          end if
-          fuffa = 0.5_kflt * sqrt(fuffa)
-          scores(iv,jv) = fuffa
-          scores(jv,iv) = fuffa
+          end do
        end do
     end do
-
+    scores = sqrt(scores)
+    if (symmetrize) scores = 0.5_kflt * scores
     call apc_correction(scores)
 
-  end subroutine compute_scores2
+  end subroutine compute_scores
 
   subroutine print_scores(uscrs)
     use units

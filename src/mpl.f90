@@ -10,7 +10,7 @@ program mpl
   use command_line,  only: read_args
   use data,          only: nd,nv,ns,data_read
   use model,         only: initialize_model, model_set_myv,fix_gauge
-  use scrs,          only: compute_scores2, print_scores
+  use scrs,          only: compute_scores, print_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
   character(long_string) :: data_file
@@ -26,6 +26,7 @@ program mpl
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
   real(kflt), allocatable :: prm(:,:) ! 1D array of parameters (nv, ns + ns x nv x ns, nv)
   real(kflt), allocatable :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
+  logical, parameter :: symmetrize=.true.
 
   call units_initialize()
 
@@ -77,8 +78,7 @@ program mpl
   flush(0)
 
   !call compute_scores(skip_gaps)
-  ! TODO: change this. this creates a temporary array.
-  call compute_scores2(nv,ns,prm(ns+1:,:),skip_gaps)
+  call compute_scores(nv,ns,prm,skip_gaps,symmetrize)
   call print_scores(uscrs)
 
   deallocate(prm,grd)
