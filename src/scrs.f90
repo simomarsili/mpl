@@ -57,10 +57,36 @@ contains
 
   end subroutine apc_correction
 
+  subroutine symmetrize_prm(nv,ns,prm)
+    ! compute scores (no temporary array)
+    integer, intent(in) :: nv,ns
+    real(kflt), intent(inout) :: prm(:,:)
+    integer :: iv,jv,is,js,k,k1,k2
+    integer :: err
+    real(kflt) :: prmm
+
+    do iv = 1,nv-1
+       k = ns
+       do is = 1,ns
+          do jv = iv+1,nv
+             do js = 1,ns
+                k = k + 1
+                k1 = kmap(jv,is,js)
+                k2 = kmap(iv,js,is)
+                prm(k1,iv) = prm(k1,iv) + prm(k2,jv)
+                prm(k2,jv) = prm(k1,iv)
+             end do
+          end do
+       end do
+    end do
+    prm = 0.5_kflt * prm
+
+  end subroutine symmetrize_prm
+
   subroutine compute_scores(nv,ns,prm,skip_gaps,symmetrize)
     ! compute scores (no temporary array)
     integer, intent(in) :: nv,ns
-    real(kflt), intent(in) :: prm(:,:)
+    real(kflt), intent(inout) :: prm(:,:)
     logical, intent(in) :: skip_gaps,symmetrize
     integer :: iv,jv,is,js,k
     integer :: err
@@ -70,6 +96,8 @@ contains
     allocate(scores(nv,nv),stat=err)
     scores = 0.0_kflt
 
+    if (symmetrize) call symmetrize_prm(nv,ns,prm)
+
     do iv = 1,nv
        k = ns
        do is = 1,ns
@@ -77,18 +105,13 @@ contains
              do js = 1,ns
                 k = k + 1
                 if (skip_gaps .and. (is == 1 .or. js == 1)) cycle
-                if (symmetrize) then 
-                   prmm = prm(k,iv) + prm(kmap(iv,js,is),jv)
-                else
-                   prmm = prm(k,iv)
-                end if
-                scores(iv,jv) = scores(iv,jv) + prmm**2
+                scores(iv,jv) = scores(iv,jv) + prm(k,iv)**2
              end do
           end do
        end do
     end do
     scores = sqrt(scores)
-    if (symmetrize) scores = 0.5_kflt * scores
+
     call apc_correction(scores)
 
   end subroutine compute_scores
