@@ -9,7 +9,7 @@ program mpl
   use units
   use command_line,  only: read_args
   use data,          only: nd,nv,ns,data_read
-  use model,         only: initialize_model, model_set_myv
+  use model,         only: initialize_model, model_set_myv,fix_gauge
   use scrs,          only: compute_scores2, print_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
@@ -68,6 +68,7 @@ program mpl
      call cpu_time(finish)
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
+     call fix_gauge(nv,ns,prm(:ns,iv),prm(ns+1:,iv))
   end do
   flush(0)
   call cpu_time(end_min)
