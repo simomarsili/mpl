@@ -102,13 +102,13 @@ contains
     real(kflt), intent(out) :: couplings(ns,ns,nv,nv)
     integer :: err
     integer :: iv,jv,is,js,k1,k2,k
-
+    
     k = 0
     do iv = 1,nv
        fields(:,iv) = prm(:ns,iv)
        k = ns
-       do is = 1,ns
-          do jv = 1,nv
+       do jv = 1,nv
+          do is = 1,ns
              do js = 1,ns
                 k = k + 1
                 couplings(is,js,iv,jv) = prm(k,iv)

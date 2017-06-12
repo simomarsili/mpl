@@ -140,15 +140,15 @@ contains
        mys = list(out_var)
        
        ! loop over the states of out_var
+       conp = fields
        do jv = 1,nv
           do is = 1,ns
-             r = fields(is) 
              if(out_var /= jv) then 
-                r = r + couplings(list(jv),jv,is) 
+                conp(is) = conp(is) + couplings(list(jv),is,jv) 
              end if
-             conp(is) = exp(r)
           end do
        end do
+       conp = exp(conp)
        
        rsum = sum(conp)
        conp = conp / rsum
@@ -162,7 +162,7 @@ contains
           model_f1(is) = model_f1(is) + pp 
           do jv = 1,nv
              if(out_var /= jv) then 
-                model_f2(list(jv),js,jv) = model_f2(list(jv),js,jv) + pp
+                model_f2(list(jv),is,jv) = model_f2(list(jv),is,jv) + pp
              end if
           end do
        end do
