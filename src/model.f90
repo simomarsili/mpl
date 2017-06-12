@@ -142,11 +142,11 @@ contains
        ! loop over the states of out_var
        conp = fields
        do jv = 1,nv
-          do is = 1,ns
-             if(out_var /= jv) then 
+          if(out_var /= jv) then 
+             do is = 1,ns
                 conp(is) = conp(is) + couplings(list(jv),is,jv) 
-             end if
-          end do
+             end do
+          end if
        end do
        conp = exp(conp)
        
