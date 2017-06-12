@@ -78,7 +78,7 @@ contains
        data_f1(mys) = data_f1(mys) + w(id)
        do jv = 1,nv
           if(jv /= out_var) then 
-             data_f2(list(jv),mys,jv) = data_f2(list(jv),mys,jv) + w(id)
+             data_f2(mys,list(jv),jv) = data_f2(mys,list(jv),jv) + w(id)
           end if
        end do
     end do
@@ -132,6 +132,7 @@ contains
     integer :: id
     real(kflt) :: ww
     integer :: is, jv
+    integer :: js
 
     ! loop over data
     do id = 1,nd
@@ -142,9 +143,10 @@ contains
        ! loop over the states of out_var
        conp = fields
        do jv = 1,nv
-          if(out_var /= jv) then 
+          if(out_var /= jv) then
+             js = list(jv)
              do is = 1,ns
-                conp(is) = conp(is) + couplings(list(jv),is,jv) 
+                conp(is) = conp(is) + couplings(is,js,jv) 
              end do
           end if
        end do
@@ -161,8 +163,9 @@ contains
           pp = conp(is) * ww
           model_f1(is) = model_f1(is) + pp 
           do jv = 1,nv
-             if(out_var /= jv) then 
-                model_f2(list(jv),is,jv) = model_f2(list(jv),is,jv) + pp
+             if(out_var /= jv) then
+                js = list(jv)
+                model_f2(is,js,jv) = model_f2(is,js,jv) + pp
              end if
           end do
        end do
