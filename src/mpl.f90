@@ -10,7 +10,7 @@ program mpl
   use command_line,  only: read_args
   use data,          only: nd,nv,ns,data_read
   use model,         only: initialize_model, model_set_myv, model_collect_prm
-  use scrs,          only: compute_scores, print_scores, compute_scores2
+  use scrs,          only: compute_scores, compute_scores2, print_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
   character(long_string) :: data_file
