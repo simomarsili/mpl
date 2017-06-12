@@ -1,7 +1,7 @@
 PROG = mpl
 FC = gfortran
-FFLAGS = -O3 -fno-automatic
-#FFLAGS = -g -Wall -Wextra -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace -ffree-line-length-0 -fcheck=all -ffpe-trap=zero,overflow,underflow -finit-real=nan
+#FFLAGS = -O3 -fno-automatic
+FFLAGS = -g -Wall -Wextra -Warray-temporaries -Wconversion -fimplicit-none -fbacktrace -ffree-line-length-0 -fcheck=all -ffpe-trap=zero,overflow,underflow -finit-real=nan
 #FFLAGS = -O3 
 LDFLAGS = 
 SRCS = kinds.f90 dvmlm.f constants.f90 parser.f90 units.f90 command_line.f90 data.f90 model.f90 dvmlm_wrapper.f90 scrs.f90 mpl.f90 
