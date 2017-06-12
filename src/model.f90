@@ -19,9 +19,6 @@ module model
   ! index of outcome variable (all the others nv - 1 variables are included in the set of explanatory variables)
   integer :: out_var
   
-  real(kflt), allocatable :: fields(:,:)      ! fields (ns x nv)
-  real(kflt), allocatable :: couplings(:,:,:) ! couplings (ns x ns x nv(nv-1)/2)
-
   ! arrays for fixed residue/sequence
   real(kflt), allocatable, save :: model_f1(:)       ! model single-variable frequencies (ns)
   real(kflt), allocatable, save :: model_f2(:,:,:)   ! model frequencies for pairs of variables (ns x nv x ns)
@@ -42,15 +39,10 @@ contains
 
     regularization_strength = lambda
 
-    allocate(fields(ns,nv),stat=err)
-    allocate(couplings(ns,ns,nv*(nv-1)/2),stat=err)
     allocate(data_f1(ns),stat=err)
     allocate(data_f2(ns,nv,ns),stat=err)
     allocate(model_f1(ns),stat=err)
     allocate(model_f2(ns,nv,ns),stat=err)
-
-    fields = 0.0_kflt
-    couplings = 0.0_kflt       
 
   end subroutine initialize_model
 
