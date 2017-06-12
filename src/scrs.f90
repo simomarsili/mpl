@@ -1,4 +1,4 @@
-! Copyright (C) 2015-2017, Simone Marsili 
+! Copyright (C) 2015-2017, Simone Marsili
 ! All rights reserved.
 ! License: BSD 3 clause
 ! License: BSD 3 clause
@@ -6,7 +6,7 @@
 module scrs
   use kinds
   implicit none
-  private 
+  private
 
   public :: compute_scores
   public :: print_scores
@@ -14,6 +14,40 @@ module scrs
   real(kflt), allocatable, save :: scores(:,:)
 
 contains
+
+  real(kflt) function frobenius(a)
+    real(kflt), intent(in) :: a(:,:)
+
+    frobenius = sqrt(sum(a**2))
+
+  end function frobenius
+
+  subroutine apc_correction(a)
+    real(kflt), intent(inout) :: a(:,:)
+    real(kflt), allocatable :: sums(:)
+    real(kflt) :: totsum
+    integer :: err
+    integer :: i,j
+    integer :: n
+
+    n = size(a,1)
+    allocate(sums(n),stat=err)
+
+    do i = 1,n
+       sums(i) = sum(a(:,i))
+    end do
+    totsum = sum(sums)
+
+    do j = 1,n
+       do i = j,n
+          a(i,j) = a(i,j) - sums(i)*sums(j)/totsum
+          a(j,i) = a(i,j)
+       end do
+    end do
+
+    deallocate(sums)
+
+  end subroutine apc_correction
 
   subroutine compute_scores(skip_gaps)
     use data, only: nv
@@ -31,7 +65,7 @@ contains
     do jv = 1,nv-1
        do iv = jv+1,nv
           k = k + 1
-          if (skip_gaps) then 
+          if (skip_gaps) then
              scores(iv,jv) = frobenius(couplings(2:,2:,k))
           else
              scores(iv,jv) = frobenius(couplings(:,:,k))
@@ -39,44 +73,8 @@ contains
           scores(jv,iv) = scores(iv,jv)
        end do
     end do
-    
+
     call apc_correction(scores)
-
-  contains
-
-    real(kflt) function frobenius(a)
-      real(kflt), intent(in) :: a(:,:)
-
-      frobenius = sqrt(sum(a**2))
-
-    end function frobenius
-
-    subroutine apc_correction(a)
-      real(kflt), intent(inout) :: a(:,:)
-      real(kflt), allocatable :: sums(:)
-      real(kflt) :: totsum
-      integer :: err
-      integer :: i,j
-      integer :: n
-
-      n = size(a,1)
-      allocate(sums(n),stat=err)
-
-      do i = 1,n
-         sums(i) = sum(a(:,i))
-      end do
-      totsum = sum(sums)
-      
-      do j = 1,n
-         do i = j,n
-            a(i,j) = a(i,j) - sums(i)*sums(j)/totsum
-            a(j,i) = a(i,j)
-         end do
-      end do
-
-      deallocate(sums)
-      
-    end subroutine apc_correction
 
   end subroutine compute_scores
 
