@@ -12,6 +12,7 @@ module model
   public :: initialize_model
   public :: model_set_myv
   public :: model_put_myv
+  public :: fix_gauge
   public :: model_collect_prm
   public :: update_gradient
   public :: cond_likelihood

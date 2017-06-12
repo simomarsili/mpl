@@ -58,7 +58,7 @@ contains
   end subroutine dvmlm_min
 
   subroutine dvmlm_minimize(prm,grd,dim,accuracy,iter,totiter)
-    use model, only: update_gradient, model_put_myv
+    use model, only: update_gradient, model_put_myv, fix_gauge
     integer, intent(in) :: dim
     real(kflt), intent(inout) :: prm(dim)
     real(kflt), intent(inout) :: grd(dim)
@@ -100,8 +100,7 @@ contains
        elseif(task(1:4) == 'CONV') then 
           ! compute final values for likelihood
           call update_gradient(nv,ns,prm(:ns),prm(ns+1),grd(:ns),grd(ns+1:))
-          ! put my prms back in fields and couplings arrays 
-          call model_put_myv(nv,ns,prm(:ns),prm(ns+1))
+          call fix_gauge(nv,ns,prm(:ns),prm(ns+1))
           exit
        end if
     end do
