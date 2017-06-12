@@ -24,8 +24,8 @@ program mpl
   integer                :: niter,neval
   real(kflt_single)      :: finish,start,start_min,end_min
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
-  real(kflt), allocatable :: prm(:,:) ! 1D array of parameters (nv, ns + ns x nv x ns)
-  real(kflt), allocatable :: grd(:,:) ! 1D gradient array (nv, ns + ns x nv x ns)
+  real(kflt), allocatable :: prm(:,:) ! 1D array of parameters (nv, ns + ns x nv x ns, nv)
+  real(kflt), allocatable :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
 
   call units_initialize()
 
@@ -54,17 +54,17 @@ program mpl
   write(0,*) 'initialize...'
   ! allocate parameters and gradient
   allocate(prm(ns + ns*ns*nv,nv),stat=err)
-  allocate(grd(ns + ns*ns*nv,nv),stat=err)
+  allocate(grd(ns + ns*ns*nv),stat=err)
   call initialize_model(lambda)
 
   write(0,*) 'minimize...'
   call cpu_time(start_min)
   ! loop over features
   do iv = 1,nv
-     call model_set_myv(iv,prm(:,iv),grd(:,iv),err)
+     call model_set_myv(iv,prm(:,iv),grd,err)
      niter = 0
      call cpu_time(start)
-     call dvmlm_minimize(prm(:,iv),grd(:,iv),size(prm(:,iv)),accuracy,niter,neval)
+     call dvmlm_minimize(prm(:,iv),grd,size(prm(:,iv)),accuracy,niter,neval)
      call cpu_time(finish)
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'

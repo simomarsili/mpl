@@ -57,10 +57,10 @@ contains
 
   end subroutine initialize_model
 
-  subroutine model_set_myv(iv,prm,grd,err) ! vcouplings
+  subroutine model_set_myv(iv,vprm,grd,err) ! vcouplings
     use data, only: nd,data_samples,w
     integer, intent(in) :: iv
-    real(kflt), intent(out) :: prm(:)
+    real(kflt), intent(out) :: vprm(:)
     real(kflt), intent(out) :: grd(:)
     ! make vcouplings given out_var 
     ! must be called before looping on data
@@ -76,7 +76,7 @@ contains
     cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
     ereg = 0.0_kflt
-    prm = 0.0_kflt
+    vprm = 0.0_kflt
     grd = 0.0_kflt
 
     ! compute variable-specific arrays of frequencies
