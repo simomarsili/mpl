@@ -27,6 +27,8 @@ program mpl
   real(kflt), allocatable :: prm(:,:) ! 1D array of parameters (nv, ns + ns x nv x ns, nv)
   real(kflt), allocatable :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
   logical, parameter :: symmetrize=.true.
+  real(kflt), allocatable :: fields(:,:) ! nv x ns
+  real(kflt), allocatable :: couplings(:,:,:,:) ! nv x nv x ns x ns
 
   call units_initialize()
 
@@ -78,9 +80,87 @@ program mpl
   flush(0)
 
   !call compute_scores(skip_gaps)
-  call compute_scores(nv,ns,prm,skip_gaps,symmetrize)
-  call print_scores(uscrs)
+  !call compute_scores(nv,ns,prm,skip_gaps,symmetrize)
+  !call print_scores(uscrs)
 
+  ! reorder prm array into fields and couplings 
+  allocate(fields(nv,ns),couplings(nv,nv,ns,ns),stat=err)
+  call reshape_prm(nv,ns,prm,fields,couplings)
   deallocate(prm,grd)
+
+  ! compute scores and print
+  call go_scores(nv,ns,couplings,uscrs)
+
+contains
+
+  subroutine reshape_prm(nv,ns,prm,fields,couplings)
+    ! reorder prm array into fields and couplings 
+    implicit none
+    integer, intent(in) :: nv,ns
+    real(kflt), intent(in) :: prm(:,:)
+    real(kflt), intent(out) :: fields(nv,ns)
+    real(kflt), intent(out) :: couplings(nv,nv,ns,ns)
+    integer :: err
+    integer :: iv,jv,is,js,k1,k2,k
+
+    k = 0
+    do iv = 1,nv
+       fields(iv,:) = prm(:ns,iv)
+       k = ns
+       do is = 1,ns
+          do jv = 1,nv
+             do js = 1,ns
+                k = k + 1
+                couplings(iv,jv,is,js) = prm(k,iv)
+             end do
+          end do
+       end do
+    end do
+    
+  end subroutine reshape_prm
+
+  subroutine go_scores(nv,ns,couplings,uscrs)
+    implicit none
+    integer(kint), intent(in) :: nv,ns
+    real(kflt), intent(in) :: couplings(nv,nv,ns,ns)
+    integer, intent(in) :: uscrs
+    integer :: iv,jv
+    real(kflt) :: sij
+    real(kflt) :: scores(nv,nv)
+    real(kflt), allocatable :: sums(:)
+    real(kflt) :: totsum
+
+    scores = 0.0_kflt
+    do iv = 1,nv-1
+       do jv = iv+1,nv
+          scores(iv,jv) = sum((couplings(iv,jv,:,:) + transpose(couplings(jv,iv,:,:)))**2)
+          scores(jv,iv) = scores(iv,jv)
+       end do
+    end do
+    scores = 0.5_kflt * sqrt(scores)
+    
+    allocate(sums(nv),stat=err)
+    do iv = 1,nv
+       sums(iv) = sum(scores(:,iv))
+    end do
+    totsum = sum(sums)
+
+    do jv = 1,nv
+       do iv = jv,nv
+          scores(iv,jv) = scores(iv,jv) - sums(iv)*sums(jv)/totsum
+          scores(jv,iv) = scores(iv,jv)
+       end do
+    end do
+
+    deallocate(sums)
+
+    do iv = 1,nv-1
+       do jv = iv+1,nv
+          sij = scores(iv,jv)
+          write(uscrs,'(i5,1x,i5,1x,f8.5)') iv,jv,sij
+       end do
+    end do
+    
+  end subroutine go_scores
 
 end program mpl
