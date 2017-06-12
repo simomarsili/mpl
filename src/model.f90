@@ -11,7 +11,6 @@ module model
 
   public :: initialize_model
   public :: model_set_myv
-  public :: model_put_myv
   public :: fix_gauge
   public :: model_collect_prm
   public :: update_gradient
@@ -95,42 +94,6 @@ contains
     deallocate(list)
 
   end subroutine model_set_myv
-
-  subroutine model_put_myv(nv1,ns1,vfields,vcouplings)
-    integer, intent(in) :: nv1,ns1
-    real(kflt), intent(inout) :: vfields(ns1)
-    real(kflt), intent(inout) :: vcouplings(ns1,nv1,ns1)
-
-    ! store vfields in fields 
-    ! store vcouplings in couplings
-    ! must be called before looping on data
-    integer :: jv,k
-
-    fields(:,out_var) = vfields
-    
-    !      --out_var--
-    !      x x x x
-    !   |  1 x x x
-    !  jv  2 4 x x
-    !   |  3 5 6 x
-    !
-    ! lower triangle packing: jv > out_var
-
-    ! remove gauge before adding to couplings
-    call fix_gauge(nv1,ns1,vfields,vcouplings)
-
-    fields(:,out_var) = vfields
-    do jv = out_var+1,nv ! jv > out_var
-       k = (out_var - 1) * nv - out_var * (out_var + 1) / 2 + jv 
-       couplings(:,:,k) = couplings(:,:,k) + vcouplings(:,jv,:)
-    end do
-
-    do jv = 1,out_var-1 ! out_var > jv: submatrices must be transposed 
-       k = (jv - 1) * nv - jv * (jv + 1) / 2 + out_var
-       couplings(:,:,k) =  couplings(:,:,k) + transpose(vcouplings(:,jv,:))
-    end do
-
-  end subroutine model_put_myv
 
   subroutine fix_gauge(nv1,ns1,vfields,vcouplings)
     integer, intent(in) :: nv1,ns1

@@ -58,7 +58,7 @@ contains
   end subroutine dvmlm_min
 
   subroutine dvmlm_minimize(prm,grd,dim,accuracy,iter,totiter)
-    use model, only: update_gradient, model_put_myv, fix_gauge
+    use model, only: update_gradient, fix_gauge
     integer, intent(in) :: dim
     real(kflt), intent(inout) :: prm(dim)
     real(kflt), intent(inout) :: grd(dim)
