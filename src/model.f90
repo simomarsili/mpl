@@ -46,12 +46,12 @@ contains
 
   end subroutine initialize_model
 
-  subroutine model_set_myv(iv,vprm,grd,err) ! vcouplings
+  subroutine model_set_myv(iv,vprm,grd,err) ! couplings
     use data, only: nd,data_samples,w
     integer, intent(in) :: iv
     real(kflt), intent(out) :: vprm(:)
     real(kflt), intent(out) :: grd(:)
-    ! make vcouplings given out_var 
+    ! make couplings given out_var 
     ! must be called before looping on data
     integer :: id,jv,mys
     integer :: err
@@ -86,19 +86,19 @@ contains
 
   end subroutine model_set_myv
 
-  subroutine fix_gauge(nv1,ns1,vfields,vcouplings)
+  subroutine fix_gauge(nv1,ns1,fields,couplings)
     integer, intent(in) :: nv1,ns1
-    real(kflt), intent(inout) :: vfields(ns1)
-    real(kflt), intent(inout) :: vcouplings(ns1,nv1,ns1)
+    real(kflt), intent(inout) :: fields(ns1)
+    real(kflt), intent(inout) :: couplings(ns1,nv1,ns1)
     integer :: jv,is,js
     real(kflt) :: mat(ns,ns),arr(ns),marr
     real(kflt) :: rsum(ns),csum(ns),totsum
 
-    arr = vfields
+    arr = fields
     marr = sum(arr) / real(ns)
     arr = arr - marr
     do jv = 1,nv
-       mat = vcouplings(:,jv,:)
+       mat = couplings(:,jv,:)
        totsum = sum(mat)
        totsum = totsum / real(ns*ns)
        do is = 1,ns
@@ -113,17 +113,17 @@ contains
              mat(is,js) = mat(is,js) - rsum(is) - csum(js) + totsum
           end do
        end do
-       vcouplings(:,jv,:) = mat
+       couplings(:,jv,:) = mat
     end do
-    vfields = arr
+    fields = arr
     
   end subroutine fix_gauge
 
-  subroutine update_model_averages(nv1,ns1,vfields,vcouplings)
+  subroutine update_model_averages(nv1,ns1,fields,couplings)
     use data, only: data_samples,w,nd
     integer, intent(in) :: nv1,ns1
-    real(kflt), intent(in) :: vfields(ns1)
-    real(kflt), intent(in) :: vcouplings(ns1,nv1,ns1)
+    real(kflt), intent(in) :: fields(ns1)
+    real(kflt), intent(in) :: couplings(ns1,nv1,ns1)
     integer :: list(nv)
     real(kflt) :: conp(ns)
     real(kflt) :: r,rsum
@@ -141,10 +141,10 @@ contains
        
        ! loop over the states of out_var 
        do is = 1,ns
-          r = vfields(is) 
+          r = fields(is) 
           do jv = 1,nv
              if(out_var /= jv) then 
-                r = r + vcouplings(list(jv),jv,is) 
+                r = r + couplings(list(jv),jv,is) 
              end if
           end do
           conp(is) = exp(r)
@@ -171,11 +171,11 @@ contains
     
   end subroutine update_model_averages
 
-  subroutine update_gradient(nv1,ns1,vfields,vcouplings,grd1,grd2)
+  subroutine update_gradient(nv1,ns1,fields,couplings,grd1,grd2)
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
     integer, intent(in) :: nv1,ns1
-    real(kflt), intent(in) :: vfields(ns1)
-    real(kflt), intent(in) :: vcouplings(ns1,nv1,ns1)
+    real(kflt), intent(in) :: fields(ns1)
+    real(kflt), intent(in) :: couplings(ns1,nv1,ns1)
     real(kflt), intent(out) :: grd1(ns1)
     real(kflt), intent(out) :: grd2(ns1,nv1,ns1)
     real(kflt) :: etot0,de
@@ -188,10 +188,10 @@ contains
     model_f2 = 0.0_kflt
     cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
-    ereg = - regularization_strength * (sum(vfields**2) + 0.5_kflt * sum(vcouplings**2))
+    ereg = - regularization_strength * (sum(fields**2) + 0.5_kflt * sum(couplings**2))
 
     ! take averages over model distribution
-    call update_model_averages(nv1,ns1,vfields,vcouplings)
+    call update_model_averages(nv1,ns1,fields,couplings)
 
     ! add regularization term to conditional likelihood
     etot = cond_likelihood + ereg
@@ -200,8 +200,8 @@ contains
     de = etot - etot0
 
     ! update gradient 
-    grd1 = model_f1 - data_f1 + 2.0_kflt * regularization_strength * vfields
-    grd2 = model_f2 - data_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * vcouplings
+    grd1 = model_f1 - data_f1 + 2.0_kflt * regularization_strength * fields
+    grd2 = model_f2 - data_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * couplings
     
   end subroutine update_gradient
 
