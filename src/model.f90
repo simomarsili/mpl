@@ -145,9 +145,7 @@ contains
        do jv = 1,nv
           if(out_var /= jv) then
              js = list(jv)
-             do is = 1,ns
-                conp(is) = conp(is) + couplings(is,js,jv) 
-             end do
+             conp = conp + couplings(:,js,jv)
           end if
        end do
        conp = exp(conp)
@@ -158,18 +156,15 @@ contains
        cond_likelihood = cond_likelihood + ww * log(conp(mys))
        
        ! update histograms 
-       ! loop over the states of out_var 
-       do is = 1,ns
-          pp = conp(is) * ww
-          model_f1(is) = model_f1(is) + pp 
-          do jv = 1,nv
-             if(out_var /= jv) then
-                js = list(jv)
-                model_f2(is,js,jv) = model_f2(is,js,jv) + pp
-             end if
-          end do
+       ! loop over the states of out_var
+       conp = conp * ww
+       model_f1 = model_f1 + conp
+       do jv = 1,nv
+          if(out_var /= jv) then
+             js = list(jv)
+             model_f2(:,js,jv) = model_f2(:,js,jv) + conp
+          end if
        end do
-       
     end do
     
   end subroutine update_model_averages
