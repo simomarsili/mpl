@@ -9,6 +9,7 @@ module scrs
   private
 
   public :: compute_scores
+  public :: compute_scores2
   public :: print_scores
 
   real(kflt), allocatable, save :: scores(:,:)
@@ -77,6 +78,44 @@ contains
     call apc_correction(scores)
 
   end subroutine compute_scores
+
+  subroutine compute_scores2(nv,ns,coups,skip_gaps)
+    integer, intent(in) :: nv,ns
+    real(kflt), intent(in) :: coups(ns,nv,ns,nv)
+    logical, intent(in) :: skip_gaps
+    integer :: iv,jv,is,js,k
+    integer :: err
+    real(kflt) :: fuffa
+
+    ! at the very end of the run
+    allocate(scores(nv,nv),stat=err)
+    scores = 0.0_kflt
+
+    do jv = 1,nv-1
+       do iv = jv+1,nv
+          fuffa = 0.0_kflt
+          if (skip_gaps) then
+             do js = 2,ns
+                do is = 2,ns
+                   fuffa = fuffa + (coups(is,iv,js,jv) + coups(js,jv,is,iv))**2
+                end do
+             end do
+          else
+             do js = 1,ns
+                do is = 1,ns
+                   fuffa = fuffa + (coups(is,iv,js,jv) + coups(js,jv,is,iv))**2
+                end do
+             end do
+          end if
+          fuffa = 0.5_kflt * sqrt(fuffa)
+          scores(iv,jv) = fuffa
+          scores(jv,iv) = fuffa
+       end do
+    end do
+
+    call apc_correction(scores)
+
+  end subroutine compute_scores2
 
   subroutine print_scores(uscrs)
     use units

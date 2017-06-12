@@ -10,7 +10,7 @@ program mpl
   use command_line,  only: read_args
   use data,          only: nd,nv,ns,data_read
   use model,         only: initialize_model, model_set_myv, model_collect_prm
-  use scrs,          only: compute_scores, print_scores
+  use scrs,          only: compute_scores, print_scores, compute_scores2
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
   character(long_string) :: data_file
@@ -75,7 +75,8 @@ program mpl
   write(0,*) 'minimization total (secs): ', end_min-start_min
   flush(0)
   call model_collect_prm()
-  call compute_scores(skip_gaps)
+  !call compute_scores(skip_gaps)
+  call compute_scores2(nv,ns,prm(ns+1:,:),skip_gaps)
   call print_scores(uscrs)
 
   deallocate(prm,grd)
