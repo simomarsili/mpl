@@ -8,7 +8,6 @@ module scrs
   implicit none
   private
 
-  public :: compute_scores
   public :: compute_scores2
   public :: print_scores
 
@@ -49,35 +48,6 @@ contains
     deallocate(sums)
 
   end subroutine apc_correction
-
-  subroutine compute_scores(skip_gaps)
-    use data, only: nv
-    use model, only: couplings
-    logical, intent(in) :: skip_gaps
-    integer :: iv,jv,k
-    integer :: err
-
-    ! at the very end of the run
-    allocate(scores(nv,nv),stat=err)
-    scores = 0.0_kflt
-
-    ! compute scores
-    k = 0
-    do jv = 1,nv-1
-       do iv = jv+1,nv
-          k = k + 1
-          if (skip_gaps) then
-             scores(iv,jv) = frobenius(couplings(2:,2:,k))
-          else
-             scores(iv,jv) = frobenius(couplings(:,:,k))
-          end if
-          scores(jv,iv) = scores(iv,jv)
-       end do
-    end do
-
-    call apc_correction(scores)
-
-  end subroutine compute_scores
 
   subroutine compute_scores2(nv,ns,coups,skip_gaps)
     integer, intent(in) :: nv,ns

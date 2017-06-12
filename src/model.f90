@@ -16,8 +16,6 @@ module model
   public :: update_gradient
   public :: cond_likelihood
   public :: etot
-  public :: fields
-  public :: couplings
 
   ! index of outcome variable (all the others nv - 1 variables are included in the set of explanatory variables)
   integer :: out_var
