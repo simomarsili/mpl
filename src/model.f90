@@ -12,7 +12,6 @@ module model
   public :: initialize_model
   public :: model_set_myv
   public :: fix_gauge
-  public :: model_collect_prm
   public :: update_gradient
   public :: cond_likelihood
   public :: etot
@@ -213,13 +212,6 @@ contains
     grd2 = model_f2 - data_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * vcouplings
     
   end subroutine update_gradient
-
-  subroutine model_collect_prm()
-
-    couplings = 0.5_kflt * couplings
-
-  end subroutine model_collect_prm
-  
 
 end module model
   
