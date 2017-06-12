@@ -77,6 +77,7 @@ program mpl
   flush(0)
 
   !call compute_scores(skip_gaps)
+  ! TODO: change this. this creates a temporary array.
   call compute_scores2(nv,ns,prm(ns+1:,:),skip_gaps)
   call print_scores(uscrs)
 
