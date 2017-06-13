@@ -1,9 +1,9 @@
 # Change log
 
 ## [Unreleased]
-- Control accuracy level for convergence speed
-- Usage info
-- Faster implementation
+- Control accuracy level for convergence speed (-a)
+- Usage info at command line (-h)
+- Improved memory usage
 
 ## [1.1] - 2017-06-08
 - Added VERSION.txt
