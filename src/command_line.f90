@@ -8,12 +8,12 @@ module command_line
   implicit none
   private
   public :: read_args
-  character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
   character(1), parameter :: nl=achar(10)
   character(long_string) :: usage = &
        'SYNTAX'//nl//&
        nl//&
        '    mpl -i <data_file> [-l <regularization_parameter>] [-w <percentage_identity>] [-g] [-a <accuracy_level>]'//nl//&
+       '                       [--scores_format <scores_matrix_format>]                                             '//nl//&
        '    mpl -h                                                                                                  '//nl//&
        nl//&
        'OPTIONS'//nl//&
@@ -31,22 +31,27 @@ module command_line
        nl//&
        '-a, --accuracy <accuracy_level> - integer, optional                                                         '//nl//&
        '    Controls thresholds for convergence. Possible values are {0, 1, 2}. Default: 1.                         '//nl//&
-       '    Larger values correspond to accurate solutions but slower covergence.                                   '//nl
+       '    Larger values correspond to accurate solutions but slower covergence.                                   '//nl//&
+       nl//&
+       '--scores_format <scores_matrix_format> - string, optional                                                   '//nl//&
+       '    Possible values are {"dense", "sparse"}. Default: "sparse".                                             '//nl//&
+       '    Dense matrices are stored in Matrix Market (MM) array format. Sparse matrices in MM coordinate format.  '//nl//&
+       '    See https://people.sc.fsu.edu/~jburkardt/data/mm/mm.html for more info.                                 '//nl
 
 contains
 
-  subroutine read_args(data_file,wid,lambda,skip_gaps,accuracy,nerrs)
+  subroutine read_args(data_file,wid,lambda,skip_gaps,accuracy,scores_format,nerrs)
     use kinds
     character(long_string), intent(out) :: data_file
     real(kflt),             intent(out) :: wid
     real(kflt),             intent(out) :: lambda
     logical,                intent(out) :: skip_gaps
     integer,                intent(out) :: accuracy
+    character(1),           intent(out) :: scores_format
     integer,                intent(out) :: nerrs
     integer :: iarg,nargs
     integer :: err
     character(long_string) :: cmd,arg
-
 
     call get_command(cmd)
     nargs = command_argument_count()
@@ -57,11 +62,13 @@ contains
 
     iarg = 1
     nerrs = 0
+    ! set defaults
     data_file = ''
     lambda = 0.01_kflt
     wid = 0.0_kflt
     skip_gaps = .false.
     accuracy = 1
+    scores_format = "s"
     do while(iarg <= nargs)
        call get_command_argument(iarg,arg)
        select case(trim(arg))
@@ -108,6 +115,18 @@ contains
              write(0,*) "error ! check accuracy"
              nerrs = nerrs + 1
           end if
+       case('--scores_format')
+          iarg = iarg + 1
+          call get_command_argument(iarg,arg)
+          select case(trim(arg))
+          case("sparse")
+             scores_format = "s"
+          case("dense")
+             scores_format = "d"
+          case default
+             write(0,*) 'error ! possible formats for scores matrix format are dense/sparse'
+             nerrs = nerrs + 1             
+          end select
        case default
           write(0,'(a,1x,a)') 'error: unknown option',trim(arg)
           nerrs = nerrs + 1             

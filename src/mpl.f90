@@ -30,11 +30,12 @@ program mpl
   real(kflt), allocatable :: fields(:,:) ! ns x nv
   real(kflt), allocatable :: couplings(:,:,:,:) ! ns x ns x nv x nv
   real(kflt), allocatable :: scores(:,:) ! nv x nv
+  character(1) :: scores_format
 
   call units_initialize()
 
   ! get command line 
-  call read_args(data_file,w_id,lambda,skip_gaps,accuracy,err)
+  call read_args(data_file,w_id,lambda,skip_gaps,accuracy,scores_format,err)
   if(err /= 0) then 
      write(0,*) 'error: check syntax'
      write(0,*) trim(syntax)
@@ -88,7 +89,8 @@ program mpl
 
   ! compute scores and print
   call compute_scores(nv,ns,couplings,scores)
-  call print_mat(scores,uscrs)
+  call print_mat(scores,uscrs,scores_format,err)
+  if (err /= 0) stop
 
 contains
 

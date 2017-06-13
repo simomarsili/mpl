@@ -41,30 +41,44 @@ contains
     deallocate(sums)
   end subroutine apc_correction
 
-  subroutine print_mat(mat,uscrs,print_indices)
+  subroutine print_mat(mat,uscrs,frmt,nerr)
+    ! https://people.sc.fsu.edu/~jburkardt/data/mm/mm.html
     real(kflt), intent(in) :: mat(:,:)
     integer, intent(in) :: uscrs
-    logical, optional, intent(in) :: print_indices
+    character(1), intent(in) :: frmt
+    integer, intent(out) :: nerr
     logical :: inds = .true.
     integer :: i,j,n1,n2
 
+    nerr = 0
+    ! check format
+    if (frmt /= "d" .and. frmt /= "s") then
+       write(0,*) "error ! unknown format for scores matrix file"
+       nerr = nerr + 1
+       return
+    end if
     n1 = size(mat,1)
     n2 = size(mat,2)
-    if (present(print_indices)) then
-       if (.not.print_indices) then
-          inds = .false.
-          write(uscrs,'(i5,1x,i5)') n1,n2
-       end if
-    end if
-    do i = 1,n1-1
-       do j = i+1,n2
-          if (inds) then
-             write(uscrs,'(i5,1x,i5,1x,f8.4)') i, j, mat(i,j)
-          else
+    ! write header line
+    select case(frmt)
+    case("d")
+       write(uscrs,'(a)') "%%MatrixMarket matrix array real symmetric"
+       write(uscrs,'(i5,1x,i5)') n1,n2
+       do j = 1,n1
+          do i = j,n2
              write(uscrs,'(f8.4)') mat(i,j)
-          end if
+          end do
        end do
-    end do
+    case("s")
+       write(uscrs,'(a)') "%%MatrixMarket matrix coordinate real symmetric"
+       write(uscrs,'(i5,1x,i5,1x,i5)') n1,n2,n1*n2
+       do j = 1,n1
+          do i = j,n2
+             write(uscrs,'(i5,1x,i5,1x,f8.4)') i, j, mat(i,j)
+          end do
+       end do
+    end select
+
   end subroutine print_mat
 
   pure subroutine compute_scores(nv,ns,couplings,scores)
