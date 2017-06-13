@@ -8,9 +8,9 @@ program mpl
   use constants,     only: long_string
   use units
   use command_line,  only: read_args
-  use data,          only: nv, data_read
-  use model,         only: initialize_model, model_set_myv, model_collect_prm
-  use scrs,          only: compute_scores, print_scores
+  use data,          only: nd,nv,ns,data_read
+  use model,         only: initialize_model, model_set_myv,fix_gauge
+  use scrs,          only: print_mat, compute_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
   character(long_string) :: data_file
@@ -24,7 +24,12 @@ program mpl
   integer                :: niter,neval
   real(kflt_single)      :: finish,start,start_min,end_min
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
-  
+  real(kflt), allocatable :: prm(:,:) ! 1D array of parameters (nv, ns + ns x nv x ns, nv)
+  real(kflt), allocatable :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
+  logical, parameter :: symmetrize=.true.
+  real(kflt), allocatable :: fields(:,:) ! ns x nv
+  real(kflt), allocatable :: couplings(:,:,:,:) ! ns x ns x nv x nv
+  real(kflt), allocatable :: scores(:,:) ! nv x nv
 
   call units_initialize()
 
@@ -51,27 +56,65 @@ program mpl
   call data_read(udata,w_id)
 
   write(0,*) 'initialize...'
+  ! allocate parameters and gradient
+  allocate(prm(ns + ns*ns*nv,nv),stat=err)
+  allocate(grd(ns + ns*ns*nv),stat=err)
+  allocate(scores(nv,nv),stat=err)
   call initialize_model(lambda)
 
   write(0,*) 'minimize...'
   call cpu_time(start_min)
   ! loop over features
   do iv = 1,nv
-     call model_set_myv(iv,err)
+     call model_set_myv(iv,prm(:,iv),grd,err)
      niter = 0
      call cpu_time(start)
-     call dvmlm_minimize(accuracy,niter,neval)
+     call dvmlm_minimize(prm(:,iv),grd,size(prm(:,iv)),accuracy,niter,neval)
      call cpu_time(finish)
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
+     call fix_gauge(nv,ns,prm(:ns,iv),prm(ns+1:,iv))
   end do
   flush(0)
   call cpu_time(end_min)
   
   write(0,*) 'minimization total (secs): ', end_min-start_min
   flush(0)
-  call model_collect_prm()
-  call compute_scores(skip_gaps)
-  call print_scores(uscrs)
+
+  ! reorder prm array into fields and couplings 
+  allocate(fields(ns,nv),couplings(ns,ns,nv,nv),stat=err)
+  call reshape_prm(nv,ns,prm,fields,couplings)
+  deallocate(prm,grd)
+
+  ! compute scores and print
+  call compute_scores(nv,ns,couplings,scores)
+  call print_mat(scores,uscrs)
+
+contains
+
+  subroutine reshape_prm(nv,ns,prm,fields,couplings)
+    ! reorder prm array into fields and couplings 
+    implicit none
+    integer, intent(in) :: nv,ns
+    real(kflt), intent(in) :: prm(:,:)
+    real(kflt), intent(out) :: fields(ns,nv)
+    real(kflt), intent(out) :: couplings(ns,ns,nv,nv)
+    integer :: err
+    integer :: iv,jv,is,js,k1,k2,k
+    
+    k = 0
+    do iv = 1,nv
+       fields(:,iv) = prm(:ns,iv)
+       k = ns
+       do jv = 1,nv
+          do js = 1,ns
+             do is = 1,ns
+                k = k + 1
+                couplings(js,is,jv,iv) = prm(k,iv)
+             end do
+          end do
+       end do
+    end do
+  end subroutine reshape_prm
 
 end program mpl

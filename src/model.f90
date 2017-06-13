@@ -9,26 +9,17 @@ module model
   implicit none
   private
 
-  public :: prm,grd
   public :: initialize_model
   public :: model_set_myv
-  public :: model_put_myv
-  public :: model_collect_prm
+  public :: fix_gauge
   public :: update_gradient
   public :: cond_likelihood
   public :: etot
-  public :: fields
-  public :: couplings
 
   ! index of outcome variable (all the others nv - 1 variables are included in the set of explanatory variables)
   integer :: out_var
   
-  real(kflt), allocatable :: fields(:,:)      ! fields (ns x nv)
-  real(kflt), allocatable :: couplings(:,:,:) ! couplings (ns x ns x nv(nv-1)/2)
-
   ! arrays for fixed residue/sequence
-  real(kflt), allocatable, save :: vfields(:)        ! out_var fields array (ns)
-  real(kflt), allocatable, save :: vcouplings(:,:,:) ! out_var couplings (ns x nv x ns)
   real(kflt), allocatable, save :: model_f1(:)       ! model single-variable frequencies (ns)
   real(kflt), allocatable, save :: model_f2(:,:,:)   ! model frequencies for pairs of variables (ns x nv x ns)
   real(kflt), allocatable, save :: data_f1(:)        ! data single-variable frequencies (ns)
@@ -40,10 +31,6 @@ module model
   ! "cost" function-related variables
   real(kflt) :: cond_likelihood,ereg,etot
 
-  ! parameters and gradients 1D arrays for the optimization routines
-  real(kflt), allocatable, save :: prm(:) ! 1D array of parameters (ns + ns x nv x ns)
-  real(kflt), allocatable, save :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
-
 contains
 
   subroutine initialize_model(lambda)
@@ -52,27 +39,19 @@ contains
 
     regularization_strength = lambda
 
-    allocate(fields(ns,nv),stat=err)
-    allocate(couplings(ns,ns,nv*(nv-1)/2),stat=err)
     allocate(data_f1(ns),stat=err)
-    allocate(data_f2(ns,nv,ns),stat=err)
-    allocate(vfields(ns),stat=err)
-    allocate(vcouplings(ns,nv,ns),stat=err)
+    allocate(data_f2(ns,ns,nv),stat=err)
     allocate(model_f1(ns),stat=err)
-    allocate(model_f2(ns,nv,ns),stat=err)
-    allocate(grd(ns + ns*ns*nv),stat=err)
-    allocate(prm(ns + ns*ns*nv),stat=err)
-
-
-    fields = 0.0_kflt
-    couplings = 0.0_kflt       
+    allocate(model_f2(ns,ns,nv),stat=err)
 
   end subroutine initialize_model
 
-  subroutine model_set_myv(iv,err) ! vcouplings
+  subroutine model_set_myv(iv,vprm,grd,err) ! couplings
     use data, only: nd,data_samples,w
     integer, intent(in) :: iv
-    ! make vcouplings given out_var 
+    real(kflt), intent(out) :: vprm(:)
+    real(kflt), intent(out) :: grd(:)
+    ! make couplings given out_var 
     ! must be called before looping on data
     integer :: id,jv,mys
     integer :: err
@@ -83,12 +62,10 @@ contains
     model_f2 = 0.0_kflt
     data_f1 = 0.0_kflt
     data_f2 = 0.0_kflt
-    vfields = 0.0_kflt
-    vcouplings = 0.0_kflt       
     cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
     ereg = 0.0_kflt
-    prm = 0.0_kflt
+    vprm = 0.0_kflt
     grd = 0.0_kflt
 
     ! compute variable-specific arrays of frequencies
@@ -101,7 +78,7 @@ contains
        data_f1(mys) = data_f1(mys) + w(id)
        do jv = 1,nv
           if(jv /= out_var) then 
-             data_f2(list(jv),jv,mys) = data_f2(list(jv),jv,mys) + w(id)
+             data_f2(mys,list(jv),jv) = data_f2(mys,list(jv),jv) + w(id)
           end if
        end do
     end do
@@ -109,48 +86,19 @@ contains
 
   end subroutine model_set_myv
 
-  subroutine model_put_myv 
-    ! store vfields in fields 
-    ! store vcouplings in couplings
-    ! must be called before looping on data
-    integer :: jv,k
-
-    fields(:,out_var) = vfields
-    
-    !      --out_var--
-    !      x x x x
-    !   |  1 x x x
-    !  jv  2 4 x x
-    !   |  3 5 6 x
-    !
-    ! lower triangle packing: jv > out_var
-
-    ! remove gauge before adding to couplings
-    call fix_gauge()
-
-    fields(:,out_var) = vfields
-    do jv = out_var+1,nv ! jv > out_var
-       k = (out_var - 1) * nv - out_var * (out_var + 1) / 2 + jv 
-       couplings(:,:,k) = couplings(:,:,k) + vcouplings(:,jv,:)
-    end do
-
-    do jv = 1,out_var-1 ! out_var > jv: submatrices must be transposed 
-       k = (jv - 1) * nv - jv * (jv + 1) / 2 + out_var
-       couplings(:,:,k) =  couplings(:,:,k) + transpose(vcouplings(:,jv,:))
-    end do
-
-  end subroutine model_put_myv
-
-  subroutine fix_gauge
+  subroutine fix_gauge(nv1,ns1,fields,couplings)
+    integer, intent(in) :: nv1,ns1
+    real(kflt), intent(inout) :: fields(ns1)
+    real(kflt), intent(inout) :: couplings(ns1,ns1,nv1)
     integer :: jv,is,js
     real(kflt) :: mat(ns,ns),arr(ns),marr
     real(kflt) :: rsum(ns),csum(ns),totsum
 
-    arr = vfields
+    arr = fields
     marr = sum(arr) / real(ns)
     arr = arr - marr
     do jv = 1,nv
-       mat = vcouplings(:,jv,:)
+       mat = couplings(:,:,jv)
        totsum = sum(mat)
        totsum = totsum / real(ns*ns)
        do is = 1,ns
@@ -165,14 +113,17 @@ contains
              mat(is,js) = mat(is,js) - rsum(is) - csum(js) + totsum
           end do
        end do
-       vcouplings(:,jv,:) = mat
+       couplings(:,:,jv) = mat
     end do
-    vfields = arr
+    fields = arr
     
   end subroutine fix_gauge
 
-  subroutine update_model_averages()
+  subroutine update_model_averages(nv1,ns1,fields,couplings)
     use data, only: data_samples,w,nd
+    integer, intent(in) :: nv1,ns1
+    real(kflt), intent(in) :: fields(ns1)
+    real(kflt), intent(in) :: couplings(ns1,ns1,nv1)
     integer :: list(nv)
     real(kflt) :: conp(ns)
     real(kflt) :: r,rsum
@@ -181,6 +132,7 @@ contains
     integer :: id
     real(kflt) :: ww
     integer :: is, jv
+    integer :: js
 
     ! loop over data
     do id = 1,nd
@@ -188,16 +140,15 @@ contains
        ww = w(id)
        mys = list(out_var)
        
-       ! loop over the states of out_var 
-       do is = 1,ns
-          r = vfields(is) 
-          do jv = 1,nv
-             if(out_var /= jv) then 
-                r = r + vcouplings(list(jv),jv,is) 
-             end if
-          end do
-          conp(is) = exp(r)
+       ! loop over the states of out_var
+       conp = fields
+       do jv = 1,nv
+          if(out_var /= jv) then
+             js = list(jv)
+             conp = conp + couplings(:,js,jv)
+          end if
        end do
+       conp = exp(conp)
        
        rsum = sum(conp)
        conp = conp / rsum
@@ -205,27 +156,27 @@ contains
        cond_likelihood = cond_likelihood + ww * log(conp(mys))
        
        ! update histograms 
-       ! loop over the states of out_var 
-       do is = 1,ns
-          pp = conp(is) * ww
-          model_f1(is) = model_f1(is) + pp 
-          do jv = 1,nv
-             if(out_var /= jv) then 
-                model_f2(list(jv),jv,is) = model_f2(list(jv),jv,is) + pp
-             end if
-          end do
+       ! loop over the states of out_var
+       conp = conp * ww
+       model_f1 = model_f1 + conp
+       do jv = 1,nv
+          if(out_var /= jv) then
+             js = list(jv)
+             model_f2(:,js,jv) = model_f2(:,js,jv) + conp
+          end if
        end do
-       
     end do
     
   end subroutine update_model_averages
 
-  subroutine update_gradient()
+  subroutine update_gradient(nv1,ns1,fields,couplings,grd1,grd2)
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
-    integer :: dim
+    integer, intent(in) :: nv1,ns1
+    real(kflt), intent(in) :: fields(ns1)
+    real(kflt), intent(in) :: couplings(ns1,ns1,nv1)
+    real(kflt), intent(out) :: grd1(ns1)
+    real(kflt), intent(out) :: grd2(ns1,ns1,nv1)
     real(kflt) :: etot0,de
-
-    call unpack_parameters()
 
     ! save old cost function value
     etot0 = etot
@@ -235,10 +186,10 @@ contains
     model_f2 = 0.0_kflt
     cond_likelihood = 0.0_kflt
     etot = 0.0_kflt
-    ereg = - regularization_strength * (sum(prm(:ns)**2) + 0.5_kflt * sum(prm(ns+1:)**2))
+    ereg = - regularization_strength * (sum(fields**2) + 0.5_kflt * sum(couplings**2))
 
     ! take averages over model distribution
-    call update_model_averages()
+    call update_model_averages(nv1,ns1,fields,couplings)
 
     ! add regularization term to conditional likelihood
     etot = cond_likelihood + ereg
@@ -247,29 +198,10 @@ contains
     de = etot - etot0
 
     ! update gradient 
-    model_f1 = model_f1 - data_f1 + 2.0_kflt * regularization_strength * vfields
-    model_f2 = model_f2 - data_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * vcouplings
-
-    dim = ns*ns*nv
-    grd(1:ns) = model_f1
-    grd(ns+1:) = reshape(model_f2,(/dim/))
+    grd1 = model_f1 - data_f1 + 2.0_kflt * regularization_strength * fields
+    grd2 = model_f2 - data_f2 + 2.0_kflt * 0.5_kflt * regularization_strength * couplings
     
   end subroutine update_gradient
-
-  subroutine unpack_parameters()
-    ! unpack field and couplings after updating parameters
-
-    vfields = prm(1:ns) 
-    vcouplings = reshape(prm(ns+1:),(/ns,nv,ns/))
-    
-  end subroutine unpack_parameters
-
-  subroutine model_collect_prm()
-
-    couplings = 0.5_kflt * couplings
-
-  end subroutine model_collect_prm
-  
 
 end module model
   
