@@ -8,10 +8,8 @@ module scrs
   implicit none
   private
 
-  public :: go_scores
+  public :: compute_scores
   public :: print_scores
-
-  real(kflt), allocatable, save :: scores(:,:)
 
 contains
 
@@ -85,7 +83,7 @@ contains
 
   end subroutine print_scores
 
-  subroutine go_scores(nv,ns,couplings,scores)
+  subroutine compute_scores(nv,ns,couplings,scores)
     implicit none
     integer(kint), intent(in) :: nv,ns
     real(kflt), intent(in) :: couplings(ns,ns,nv,nv)
@@ -127,6 +125,6 @@ contains
 !       end do
 !    end do
     
-  end subroutine go_scores
+  end subroutine compute_scores
 
 end module scrs
