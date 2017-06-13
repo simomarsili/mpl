@@ -10,7 +10,7 @@ program mpl
   use command_line,  only: read_args
   use data,          only: nd,nv,ns,data_read
   use model,         only: initialize_model, model_set_myv,fix_gauge
-  use scrs,          only: print_scores, compute_scores
+  use scrs,          only: print_mat, compute_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
   character(long_string) :: data_file
@@ -88,7 +88,7 @@ program mpl
 
   ! compute scores and print
   call compute_scores(nv,ns,couplings,scores)
-  call print_scores(scores,uscrs)
+  call print_mat(scores,uscrs)
 
 contains
 

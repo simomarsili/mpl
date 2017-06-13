@@ -9,7 +9,7 @@ module scrs
   private
 
   public :: compute_scores
-  public :: print_scores
+  public :: print_mat
 
 contains
 
@@ -47,7 +47,7 @@ contains
 
   end subroutine apc_correction
 
-  subroutine print_scores(mat,uscrs,print_indices)
+  subroutine print_mat(mat,uscrs,print_indices)
     real(kflt), intent(in) :: mat(:,:)
     integer, intent(in) :: uscrs
     logical, optional, intent(in) :: print_indices
@@ -73,7 +73,7 @@ contains
        end do
     end do
 
-  end subroutine print_scores
+  end subroutine print_mat
 
   subroutine compute_scores(nv,ns,couplings,scores)
     implicit none
@@ -109,14 +109,6 @@ contains
     
     deallocate(sums)
 
-!    call print_scores(uscrs)
-!    do iv = 1,nv-1
-!       do jv = iv+1,nv
-!          sij = scores(iv,jv)
-!          write(uscrs,'(i5,1x,i5,1x,f8.5)') iv,jv,sij
-!       end do
-!    end do
-    
   end subroutine compute_scores
 
 end module scrs
