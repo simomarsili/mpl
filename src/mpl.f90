@@ -10,7 +10,7 @@ program mpl
   use command_line,  only: read_args
   use data,          only: nd,nv,ns,data_read
   use model,         only: initialize_model, model_set_myv,fix_gauge
-  use scrs,          only: compute_scores, print_scores
+  use scrs,          only: compute_scores, print_scores, go_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
   character(long_string) :: data_file
@@ -29,6 +29,7 @@ program mpl
   logical, parameter :: symmetrize=.true.
   real(kflt), allocatable :: fields(:,:) ! ns x nv
   real(kflt), allocatable :: couplings(:,:,:,:) ! ns x ns x nv x nv
+  real(kflt), allocatable :: scores(:,:) ! nv x nv
 
   call units_initialize()
 
@@ -58,6 +59,7 @@ program mpl
   ! allocate parameters and gradient
   allocate(prm(ns + ns*ns*nv,nv),stat=err)
   allocate(grd(ns + ns*ns*nv),stat=err)
+  allocate(scores(nv,nv),stat=err)
   call initialize_model(lambda)
 
   write(0,*) 'minimize...'
@@ -89,7 +91,8 @@ program mpl
   deallocate(prm,grd)
 
   ! compute scores and print
-  call go_scores(nv,ns,couplings,uscrs)
+  call go_scores(nv,ns,couplings,scores)
+  call print_scores(scores,uscrs)
 
 contains
 
@@ -118,49 +121,5 @@ contains
     end do
     
   end subroutine reshape_prm
-
-  subroutine go_scores(nv,ns,couplings,uscrs)
-    implicit none
-    integer(kint), intent(in) :: nv,ns
-    real(kflt), intent(in) :: couplings(ns,ns,nv,nv)
-    integer, intent(in) :: uscrs
-    integer :: iv,jv
-    real(kflt) :: sij
-    real(kflt) :: scores(nv,nv)
-    real(kflt), allocatable :: sums(:)
-    real(kflt) :: totsum
-    
-    scores = 0.0_kflt
-    do iv = 1,nv-1
-       do jv = iv+1,nv
-          scores(iv,jv) = sum((couplings(:,:,iv,jv) + transpose(couplings(:,:,jv,iv)))**2)
-          scores(jv,iv) = scores(iv,jv)
-       end do
-    end do
-    scores = 0.5_kflt * sqrt(scores)
-    
-    allocate(sums(nv),stat=err)
-    do iv = 1,nv
-       sums(iv) = sum(scores(:,iv))
-    end do
-    totsum = sum(sums)
-
-    do jv = 1,nv
-       do iv = jv,nv
-          scores(iv,jv) = scores(iv,jv) - sums(iv)*sums(jv)/totsum
-          scores(jv,iv) = scores(iv,jv)
-       end do
-    end do
-
-    deallocate(sums)
-
-    do iv = 1,nv-1
-       do jv = iv+1,nv
-          sij = scores(iv,jv)
-          write(uscrs,'(i5,1x,i5,1x,f8.5)') iv,jv,sij
-       end do
-    end do
-    
-  end subroutine go_scores
 
 end program mpl
