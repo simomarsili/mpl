@@ -13,14 +13,6 @@ module scrs
 
 contains
 
-  pure integer function kmap(v2,a1,a2) result(k)
-    ! returns the index of element (b,v,a,u) in prm
-    use data, only: nv,ns
-    implicit none
-    integer, intent(in) :: v2,a1,a2
-    k = ns + (a1 - 1) * ns*nv + (v2 - 1) * ns + a2
-  end function kmap
-
   real(kflt) function frobenius(a)
     real(kflt), intent(in) :: a(:,:)
 
