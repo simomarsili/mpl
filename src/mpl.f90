@@ -107,15 +107,14 @@ contains
        fields(:,iv) = prm(:ns,iv)
        k = ns
        do jv = 1,nv
-          do is = 1,ns
-             do js = 1,ns
+          do js = 1,ns
+             do is = 1,ns
                 k = k + 1
-                couplings(is,js,iv,jv) = prm(k,iv)
+                couplings(js,is,jv,iv) = prm(k,iv)
              end do
           end do
        end do
     end do
-    
   end subroutine reshape_prm
 
 end program mpl
