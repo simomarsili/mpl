@@ -50,7 +50,7 @@ program mpl
   end if
   
   ! open scores file
-  scores_file = trim(data_file)//'.scores.mtx'
+  scores_file = trim(data_file)//'.scores'
   call units_open(scores_file,uscrs,'U',err)
 
   write(0,*) 'reading data...'

@@ -52,7 +52,7 @@ contains
 
     nerr = 0
     ! check format
-    if (frmt /= "d" .and. frmt /= "s") then
+    if (.not. any(["p","c","a"] == frmt)) then
        write(0,*) "error ! unknown format for scores matrix file"
        nerr = nerr + 1
        return
@@ -61,7 +61,13 @@ contains
     n2 = size(mat,2)
     ! write header line
     select case(frmt)
-    case("d")
+    case("p")
+       do j = 1,n1
+          do i = j,n2
+             write(uscrs,'(i5,1x,i5,1x,f8.4)') i, j, mat(i,j)
+          end do
+       end do
+    case("a")
        write(uscrs,'(a)') "%%MatrixMarket matrix array real symmetric"
        write(uscrs,'(i5,1x,i5)') n1,n2
        do j = 1,n1
@@ -69,7 +75,7 @@ contains
              write(uscrs,'(f8.4)') mat(i,j)
           end do
        end do
-    case("s")
+    case("c")
        write(uscrs,'(a)') "%%MatrixMarket matrix coordinate real symmetric"
        write(uscrs,'(i5,1x,i5,1x,i5)') n1,n2,n1*n2
        do j = 1,n1
