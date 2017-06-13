@@ -5,6 +5,7 @@ src/*.o
 src/mpl
 test
 !test.bash
-!500.txt
-!500.txt.SCORES
-!larger_test.txt.SCORES
+!test.txt
+!test.txt.SCORES.mtx
+!large_test.txt.SCORES
+!large_test.txt.SCORES.mtx
