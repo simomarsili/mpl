@@ -14,8 +14,7 @@ program mpl
   ! input variables
   character(long_string) :: data_file, scores_file
   real(kflt)             :: w_id, lambda
-  logical                :: ignore_pivot
-  integer                :: accuracy
+  integer                :: ignore_pivot, accuracy
   character(1)           :: scores_format
   ! main arrays for the run
   integer,    allocatable :: data_samples(:,:)  ! nv x nd
@@ -102,17 +101,18 @@ program mpl
          '    Controls L_2 regularization strength.                      '/&
          '    [default: 0.01]                                            '/&
          '                                                               '/&
-         '-w, --reweight <percentage_identity> - float, optional         '/&
+         '-w, --reweight <percentage_identity> float, optional           '/&
          '    Reweight data using a percentage identity threshold.       '/&
          '    [default: no reweight.]                                    '/&
          '                                                               '/&
-         '-g, --no_gap - optional                                        '/&
-         '    Do not consider state "1" in the calculation of the scores.'/&
-         '                                                               '/&
-         '-a, --accuracy <accuracy_level> - integer, optional            '/&
+         '-a, --accuracy <accuracy_level> integer, optional              '/&
          '    Larger values correspond to increased accuracy and slower  '/&
          '    covergence. Possible values are {0, 1, 2}.                 '/&
          '    [default: 1.]                                              '/&
+         '                                                               '/&
+         '--ignore_pivot <pivot_state> integer, optional                 '/&
+         '    Ignore the contribution of <pivot_state> to final scores.  '/&
+         '    [default: include all states.]                             '/&
          '                                                               '/&
          '--scores_format <scores_matrix_format> - string, optional      '/&
          '    Possible values are {"rcv", "array", "coordinate"}.        '/&

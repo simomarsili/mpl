@@ -15,7 +15,7 @@ contains
     character(long_string), intent(out) :: data_file
     real(kflt),             intent(out) :: wid
     real(kflt),             intent(out) :: lambda
-    logical,                intent(out) :: ignore_pivot
+    integer,                intent(out) :: ignore_pivot
     integer,                intent(out) :: accuracy
     character(1),           intent(out) :: scores_format
     integer,                intent(out) :: nerrs
@@ -39,6 +39,7 @@ contains
     ignore_pivot = .false.
     accuracy = 1
     scores_format = "r"
+    ignore_pivot = 0
     do while(iarg <= nargs)
        call get_command_argument(iarg,arg)
        select case(trim(arg))
@@ -74,9 +75,15 @@ contains
              write(0,*) "error ! check lambda"
              nerrs = nerrs + 1
           end if
-       case('-g','--no_gap')
-          ! remove contrib. from state 1 to the final scores
-          ignore_pivot = .true.
+       case('-p','--ignore_pivot')
+          ! remove contrib. from pivot state  to the final scores
+          iarg = iarg + 1
+          call get_command_argument(iarg,arg)
+          read(arg,*,iostat=err) ignore_pivot
+          if ( err/=0 ) then
+             write(0,*) "error ! check -p,--ignore_pivot"
+             nerrs = nerrs + 1
+          end if
        case('-a','--accuracy')
           iarg = iarg + 1
           call get_command_argument(iarg,arg)
