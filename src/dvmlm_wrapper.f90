@@ -57,9 +57,10 @@ contains
 
   end subroutine dvmlm_min
 
-  subroutine dvmlm_minimize(prm,grd,dim,accuracy,iter,totiter)
+  subroutine dvmlm_minimize(nv1,ns1,nd1,data_samples,prm,grd,dim,accuracy,iter,totiter)
     use model, only: update_gradient
-    integer, intent(in) :: dim
+    integer, intent(in) :: nv1,ns1,nd1,dim
+    integer, intent(in) :: data_samples(nv1,ns1)
     real(kflt), intent(inout) :: prm(dim)
     real(kflt), intent(inout) :: grd(dim)
     integer, intent(in) :: accuracy
@@ -80,7 +81,7 @@ contains
     lwa = 2*ndim*mstep + 2*ndim + mstep
     allocate(wa(lwa),stat=err)
     
-    call update_gradient(nv,ns,prm(:ns),prm(ns+1:),grd(:ns),grd(ns+1:))
+    call update_gradient(nv1,ns1,nd1,data_samples,prm(:ns),prm(ns+1:),grd(:ns),grd(ns+1:))
     do 
        if(totiter > 100) then 
           write(0,*) 'warning: totiter > 100'
@@ -90,7 +91,7 @@ contains
        if(task(1:2) == 'FG') then 
           ! update etot and gradient for line search
           totiter = totiter + 1
-          call update_gradient(nv,ns,prm(:ns),prm(ns+1:),grd(:ns),grd(ns+1:))
+          call update_gradient(nv1,ns1,nd1,data_samples,prm(:ns),prm(ns+1:),grd(:ns),grd(ns+1:))
        elseif(task(1:4) == 'NEWX') then
           ! start new line search
           iter = iter + 1
@@ -99,7 +100,7 @@ contains
           flush(0)
        elseif(task(1:4) == 'CONV') then 
           ! compute final values for likelihood
-          call update_gradient(nv,ns,prm(:ns),prm(ns+1:),grd(:ns),grd(ns+1:))
+          call update_gradient(nv1,ns1,nd1,data_samples,prm(:ns),prm(ns+1:),grd(:ns),grd(ns+1:))
           exit
        end if
     end do

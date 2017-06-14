@@ -12,17 +12,15 @@ module data
   public :: nv ! number of variables
   public :: ns ! number of states
 
-  public :: data_samples
   public :: w
   public :: neff
 
-  public :: data_read
+  public :: data_initialize, data_read
 
   integer :: nd   ! number of data samples
   integer :: nv   ! number of variables
   integer :: ns ! number of states per variable
 
-  integer, allocatable :: data_samples(:,:)
   real(kflt), allocatable :: w(:)
   real(kflt) :: neff
 
@@ -55,24 +53,22 @@ contains
 
     ! allocate memory for the data
 
-    allocate(data_samples(nv,nd),stat=err)
     allocate(w(nd),stat=err)
 
     neff = nd
 
   end subroutine data_initialize
 
-  subroutine data_read(udata,w_id)
+  subroutine data_read(udata,data_samples,w_id)
     use constants, only: long_string
     use parser, only: parser_nfields
     integer,    intent(in) :: udata
+    integer, intent(out) :: data_samples(:,:)
     real(kflt), intent(in) :: w_id
     integer :: i
     integer :: nfields
     integer :: err
     character(long_string) :: line,newline
-
-    call data_initialize(udata)
 
     do i = 1,nd
        if(mod(i,100) == 0)write(0,*) 'data: ', i
@@ -93,14 +89,15 @@ contains
 
     if(w_id > 1.E-10_kflt) then
        write(0,*) 'computing weights...'
-       call data_reweight(w_id)
+       call data_reweight(data_samples,w_id)
     else
        w = 1.0_kflt / real(nd)
     end if
 
   end subroutine data_read
 
-  subroutine data_reweight(w_id)
+  subroutine data_reweight(data_samples,w_id)
+    integer, intent(in) :: data_samples(:,:)
     real(kflt), intent(in) :: w_id
     integer :: id,jd
     integer :: err

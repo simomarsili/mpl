@@ -46,9 +46,10 @@ contains
 
   end subroutine initialize_model
 
-  subroutine model_set_myv(iv,vprm,grd,err) ! couplings
-    use data, only: nd,data_samples,w
+  subroutine model_set_myv(iv,data_samples,vprm,grd,err) ! couplings
+    use data, only: nd,w
     integer, intent(in) :: iv
+    integer, intent(in) :: data_samples(:,:)
     real(kflt), intent(out) :: vprm(:)
     real(kflt), intent(out) :: grd(:)
     ! make couplings given out_var 
@@ -119,9 +120,10 @@ contains
     
   end subroutine fix_gauge
 
-  subroutine update_model_averages(nv1,ns1,fields,couplings)
-    use data, only: data_samples,w,nd
-    integer, intent(in) :: nv1,ns1
+  subroutine update_model_averages(nv1,ns1,nd1,data_samples,fields,couplings)
+    use data, only: w,nd
+    integer, intent(in) :: nv1,ns1,nd1
+    integer, intent(in) :: data_samples(nv1,nd1)
     real(kflt), intent(in) :: fields(ns1)
     real(kflt), intent(in) :: couplings(ns1,ns1,nv1)
     integer :: list(nv)
@@ -168,10 +170,11 @@ contains
     end do
     
   end subroutine update_model_averages
-
-  subroutine update_gradient(nv1,ns1,fields,couplings,grd1,grd2)
+  
+  subroutine update_gradient(nv1,ns1,nd1,data_samples,fields,couplings,grd1,grd2)
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
-    integer, intent(in) :: nv1,ns1
+    integer, intent(in) :: nv1,ns1,nd1
+    integer, intent(in) :: data_samples(nv1,nd1)
     real(kflt), intent(in) :: fields(ns1)
     real(kflt), intent(in) :: couplings(ns1,ns1,nv1)
     real(kflt), intent(out) :: grd1(ns1)
@@ -189,7 +192,7 @@ contains
     ereg = - regularization_strength * (sum(fields**2) + 0.5_kflt * sum(couplings**2))
 
     ! take averages over model distribution
-    call update_model_averages(nv1,ns1,fields,couplings)
+    call update_model_averages(nv1,ns1,nd1,data_samples,fields,couplings)
 
     ! add regularization term to conditional likelihood
     etot = cond_likelihood + ereg

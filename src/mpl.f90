@@ -8,7 +8,7 @@ program mpl
   use constants,     only: long_string
   use units
   use command_line,  only: read_args
-  use data,          only: nd,nv,ns,data_read
+  use data,          only: nd,nv,ns,data_initialize,data_read
   use model,         only: initialize_model, model_set_myv,fix_gauge
   use scrs,          only: print_mat, compute_scores
   use dvmlm_wrapper, only: dvmlm_minimize
@@ -27,6 +27,8 @@ program mpl
   real(kflt), allocatable :: prm(:,:) ! 1D array of parameters (nv, ns + ns x nv x ns, nv)
   real(kflt), allocatable :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
   logical, parameter :: symmetrize=.true.
+
+  integer, allocatable :: data_samples(:,:)
   real(kflt), allocatable :: fields(:,:) ! ns x nv
   real(kflt), allocatable :: couplings(:,:,:,:) ! ns x ns x nv x nv
   real(kflt), allocatable :: scores(:,:) ! nv x nv
@@ -52,10 +54,11 @@ program mpl
   scores_file = trim(data_file)//'.scores'
   call units_open(scores_file,uscrs,'U',err)
 
+  call data_initialize(udata)
+  allocate(data_samples(nv,nd),stat=err)
   write(0,*) 'reading data...'
-  call data_read(udata,w_id)
+  call data_read(udata,data_samples,w_id)
 
-  write(0,*) 'initialize...'
   ! allocate parameters and gradient
   allocate(prm(ns + ns*ns*nv,nv),stat=err)
   allocate(grd(ns + ns*ns*nv),stat=err)
@@ -66,10 +69,10 @@ program mpl
   call cpu_time(start_min)
   ! loop over features
   do iv = 1,nv
-     call model_set_myv(iv,prm(:,iv),grd,err)
+     call model_set_myv(iv,data_samples,prm(:,iv),grd,err)
      niter = 0
      call cpu_time(start)
-     call dvmlm_minimize(prm(:,iv),grd,size(prm(:,iv)),accuracy,niter,neval)
+     call dvmlm_minimize(nv,ns,nd,data_samples,prm(:,iv),grd,size(prm(:,iv)),accuracy,niter,neval)
      call cpu_time(finish)
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
