@@ -7,12 +7,7 @@ module data
   implicit none
   private
 
-  public :: nd ! number of data samples
-  public :: nv ! number of variables
-  public :: ns ! number of states
-
   public :: w
-  public :: neff
 
   public :: data_initialize, data_read
 
@@ -21,14 +16,15 @@ module data
   integer :: ns ! number of states per variable
 
   real(kflt), allocatable :: w(:)
-  real(kflt) :: neff
 
 contains
 
-  subroutine data_initialize(udata)
+  subroutine data_initialize(udata,nd,nv,neff)
     use constants, only: long_string
     use parser, only: parser_nfields
     integer, intent(in) :: udata
+    integer, intent(out) :: nv,nd
+    real(kflt), intent(out) :: neff
     integer :: nfields
     integer :: err
     character(long_string) :: line,newline
@@ -57,18 +53,22 @@ contains
     neff = nd
 
   end subroutine data_initialize
-
-  subroutine data_read(udata,data_samples,w_id)
+  
+  subroutine data_read(udata,w_id,ns,neff,data_samples)
     use constants, only: long_string
     use parser, only: parser_nfields
     integer,    intent(in) :: udata
-    integer, intent(out) :: data_samples(:,:)
     real(kflt), intent(in) :: w_id
+    integer, intent(out) :: ns
+    real(kflt), intent(out) :: neff
+    integer, intent(out) :: data_samples(:,:)
     integer :: i
     integer :: nfields
     integer :: err
     character(long_string) :: line,newline
 
+    nv = size(data_samples,dim=1)
+    nd = size(data_samples,dim=2)
     do i = 1,nd
        if(mod(i,100) == 0)write(0,*) 'data: ', i
        read(udata,'(a)',iostat=err) line
@@ -80,30 +80,30 @@ contains
     if (any(data_samples==0)) data_samples = data_samples + 1
 
     ns = maxval(data_samples)
-
-    write(0,*) 'nd: ', nd
-    write(0,*) 'nv: ', nv
-    write(0,*) 'ns: ', ns
+    
+    write(0,*) '(nd, nv, ns)', nd, nv, ns
     flush(0)
-
+    
     if(w_id > 1.E-10_kflt) then
        write(0,*) 'computing weights...'
-       call data_reweight(data_samples,w_id)
+       call data_reweight(data_samples,w_id,neff)
     else
        w = 1.0_kflt / real(nd)
     end if
 
   end subroutine data_read
 
-  subroutine data_reweight(data_samples,w_id)
+  subroutine data_reweight(data_samples,w_id,neff)
     integer, intent(in) :: data_samples(:,:)
     real(kflt), intent(in) :: w_id
+    real(kflt), intent(out) :: neff
     integer :: id,jd
     integer :: err
     integer, allocatable :: x(:),y(:)
 
+    nv = size(data_samples,dim=1)
+    nd = size(data_samples,dim=2)
     allocate(x(nv),y(nv),stat=err)
-
     w = 1.0_kflt
     do id = 1,nd-1
        if(mod(id,1000) == 0) then

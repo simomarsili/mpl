@@ -6,7 +6,7 @@ program mpl
   use kinds
   use constants,     only: long_string
   use command_line,  only: read_args
-  use data,          only: nd,nv,ns,data_initialize,data_read
+  use data,          only: data_initialize,data_read
   use model,         only: initialize_model, model_set_myv,fix_gauge
   use scrs,          only: print_mat, compute_scores
   use dvmlm_wrapper, only: dvmlm_minimize
@@ -16,6 +16,11 @@ program mpl
   real(kflt)             :: w_id, lambda
   integer                :: ignore_pivot, accuracy
   character(1)           :: scores_format
+  ! data dimensions
+  integer :: nd ! n. of samples
+  integer :: nv ! n. of variables
+  integer :: ns ! n. of classes
+  real(kflt) :: neff
   ! main arrays for the run
   integer,    allocatable :: data_samples(:,:)  ! nv x nd
   real(kflt), allocatable :: prm(:,:)           ! (ns + ns x ns x nv) x nv
@@ -47,22 +52,22 @@ program mpl
   scores_file = trim(data_file)//'.scores'
   open(newunit=uscrs,file=scores_file,status='replace',iostat=err)
 
-  call data_initialize(udata)
+  call data_initialize(udata,nd,nv,neff)
   allocate(data_samples(nv,nd),stat=err)
   write(0,*) 'reading data...'
-  call data_read(udata,data_samples,w_id)
+  call data_read(udata,w_id,ns,neff,data_samples)
 
   ! allocate parameters and gradient
   allocate(prm(ns + ns*ns*nv,nv),stat=err)
   allocate(grd(ns + ns*ns*nv),stat=err)
   allocate(scores(nv,nv),stat=err)
-  call initialize_model(lambda)
+  call initialize_model(nv,ns,lambda)
 
   write(0,*) 'minimize...'
   call cpu_time(start_min)
   ! loop over features
   do iv = 1,nv
-     call model_set_myv(iv,data_samples,prm(:,iv),grd,err)
+     call model_set_myv(nd,nv,iv,data_samples,prm(:,iv),grd,err)
      niter = 0
      call cpu_time(start)
      call dvmlm_minimize(nv,ns,nd,data_samples,prm(:,iv),grd,size(prm(:,iv)),accuracy,niter,neval)
