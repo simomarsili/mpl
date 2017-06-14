@@ -58,8 +58,8 @@ contains
     call get_command(cmd)
     nargs = command_argument_count()
     if (nargs == 0) then
-       write(0,'(a)') trim(usage)
-       stop
+       nerrs = -1
+       return
     end if
 
     iarg = 1
@@ -75,8 +75,8 @@ contains
        call get_command_argument(iarg,arg)
        select case(trim(arg))
        case('-h')
-          write(0,'(a)') trim(usage)
-          stop
+          nerrs = -1
+          return
        case('-i','--input')
           ! input file
           iarg = iarg + 1

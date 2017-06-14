@@ -37,8 +37,7 @@ program mpl
   ! get command line 
   call read_args(data_file,w_id,lambda,skip_gaps,accuracy,scores_format,err)
   if(err /= 0) then 
-     write(0,*) 'error: check syntax'
-     write(0,*) trim(syntax)
+     write(0,100) 
      stop
   end if
 
@@ -92,6 +91,40 @@ program mpl
   call print_mat(scores,uscrs,scores_format,err)
   if (err /= 0) stop
 
+100 format(/&
+         'mpl                                                            '/&
+         '                                                               '/&
+         'Usage:                                                         '/&
+         '    mpl [options] -i <file>                                    '/&
+         '                                                               '/&
+         'Options:                                                       '/&
+         '-h, --help                                                     '/&
+         '    Display this help and exit.                                '/&
+         '                                                               '/&
+         '-l, --lambda <regularization_parameter> float, optional        '/&
+         '    Controls L_2 regularization strength.                      '/&
+         '    [default: 0.01]                                            '/&
+         '                                                               '/&
+         '-w, --reweight <percentage_identity> - float, optional         '/&
+         '    Reweight data using a percentage identity threshold.       '/&
+         '    [default: no reweight.]                                    '/&
+         '                                                               '/&
+         '-g, --no_gap - optional                                        '/&
+         '    Do not consider state "1" in the calculation of the scores.'/&
+         '                                                               '/&
+         '-a, --accuracy <accuracy_level> - integer, optional            '/&
+         '    Larger values correspond to increased accuracy and slower  '/&
+         '    covergence. Possible values are {0, 1, 2}.                 '/&
+         '    [default: 1.]                                              '/&
+         '                                                               '/&
+         '--scores_format <scores_matrix_format> - string, optional      '/&
+         '    Possible values are {"rcv", "array", "coordinate"}.        '/&
+         '    "rcv": (row_index, column_index, value) format             '/&
+         '    "coordinate", "array": Matrix Market (MM) formats. See:    '/&
+         '    https://people.sc.fsu.edu/~jburkardt/data/mm/mm.html       '/&
+         '    [default: "rcv"].                                          '/)
+  
+  
 contains
 
   subroutine reshape_prm(nv,ns,prm,fields,couplings)
