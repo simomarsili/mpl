@@ -87,30 +87,30 @@ contains
 
   end subroutine model_set_myv
 
-  subroutine fix_gauge(nv1,ns1,fields,couplings)
-    integer, intent(in) :: nv1,ns1
-    real(kflt), intent(inout) :: fields(ns1)
-    real(kflt), intent(inout) :: couplings(ns1,ns1,nv1)
+  subroutine fix_gauge(nv,ns,fields,couplings)
+    integer, intent(in) :: nv,ns
+    real(kflt), intent(inout) :: fields(ns)
+    real(kflt), intent(inout) :: couplings(ns,ns,nv)
     integer :: jv,is,js
-    real(kflt) :: mat(ns1,ns1),arr(ns1),marr
-    real(kflt) :: rsum(ns1),csum(ns1),totsum
+    real(kflt) :: mat(ns,ns),arr(ns),marr
+    real(kflt) :: rsum(ns),csum(ns),totsum
 
     arr = fields
-    marr = sum(arr) / real(ns1)
+    marr = sum(arr) / real(ns)
     arr = arr - marr
-    do jv = 1,nv1
+    do jv = 1,nv
        mat = couplings(:,:,jv)
        totsum = sum(mat)
-       totsum = totsum / real(ns1*ns1)
-       do is = 1,ns1
+       totsum = totsum / real(ns*ns)
+       do is = 1,ns
           rsum(is) = sum(mat(is,:))
           csum(is) = sum(mat(:,is))
        end do
-       rsum = rsum / real(ns1)
-       csum = csum / real(ns1)
+       rsum = rsum / real(ns)
+       csum = csum / real(ns)
        if(jv /= out_var) arr = arr + csum - totsum
-       do js = 1,ns1
-          do is = 1,ns1
+       do js = 1,ns
+          do is = 1,ns
              mat(is,js) = mat(is,js) - rsum(is) - csum(js) + totsum
           end do
        end do
@@ -120,14 +120,14 @@ contains
     
   end subroutine fix_gauge
 
-  subroutine update_model_averages(nv1,ns1,nd1,data_samples,fields,couplings)
+  subroutine update_model_averages(nv,ns,nd,data_samples,fields,couplings)
     use data, only: w
-    integer, intent(in) :: nv1,ns1,nd1
-    integer, intent(in) :: data_samples(nv1,nd1)
-    real(kflt), intent(in) :: fields(ns1)
-    real(kflt), intent(in) :: couplings(ns1,ns1,nv1)
-    integer :: list(nv1)
-    real(kflt) :: conp(ns1)
+    integer, intent(in) :: nv,ns,nd
+    integer, intent(in) :: data_samples(nv,nd)
+    real(kflt), intent(in) :: fields(ns)
+    real(kflt), intent(in) :: couplings(ns,ns,nv)
+    integer :: list(nv)
+    real(kflt) :: conp(ns)
     real(kflt) :: r,rsum
     real(kflt) :: pp
     integer :: mys
@@ -137,14 +137,14 @@ contains
     integer :: js
 
     ! loop over data
-    do id = 1,nd1
+    do id = 1,nd
        list = data_samples(:,id)
        ww = w(id)
        mys = list(out_var)
        
        ! loop over the states of out_var
        conp = fields
-       do jv = 1,nv1
+       do jv = 1,nv
           if(out_var /= jv) then
              js = list(jv)
              conp = conp + couplings(:,js,jv)
@@ -161,7 +161,7 @@ contains
        ! loop over the states of out_var
        conp = conp * ww
        model_f1 = model_f1 + conp
-       do jv = 1,nv1
+       do jv = 1,nv
           if(out_var /= jv) then
              js = list(jv)
              model_f2(:,js,jv) = model_f2(:,js,jv) + conp
@@ -171,14 +171,14 @@ contains
     
   end subroutine update_model_averages
   
-  subroutine update_gradient(nv1,ns1,nd1,data_samples,fields,couplings,grd1,grd2)
+  subroutine update_gradient(nv,ns,nd,data_samples,fields,couplings,grd1,grd2)
     ! update cost-related variables: etot, cond_likelihood, ereg and gradient grd
-    integer, intent(in) :: nv1,ns1,nd1
-    integer, intent(in) :: data_samples(nv1,nd1)
-    real(kflt), intent(in) :: fields(ns1)
-    real(kflt), intent(in) :: couplings(ns1,ns1,nv1)
-    real(kflt), intent(out) :: grd1(ns1)
-    real(kflt), intent(out) :: grd2(ns1,ns1,nv1)
+    integer, intent(in) :: nv,ns,nd
+    integer, intent(in) :: data_samples(nv,nd)
+    real(kflt), intent(in) :: fields(ns)
+    real(kflt), intent(in) :: couplings(ns,ns,nv)
+    real(kflt), intent(out) :: grd1(ns)
+    real(kflt), intent(out) :: grd2(ns,ns,nv)
     real(kflt) :: etot0,de
 
     ! save old cost function value
@@ -192,7 +192,7 @@ contains
     ereg = - regularization_strength * (sum(fields**2) + 0.5_kflt * sum(couplings**2))
 
     ! take averages over model distribution
-    call update_model_averages(nv1,ns1,nd1,data_samples,fields,couplings)
+    call update_model_averages(nv,ns,nd,data_samples,fields,couplings)
 
     ! add regularization term to conditional likelihood
     etot = cond_likelihood + ereg
