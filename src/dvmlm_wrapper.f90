@@ -55,7 +55,7 @@ contains
 
   end subroutine dvmlm_min
 
-  subroutine dvmlm_minimize(nv,ns,nd,data_samples,prm,grd,dim,accuracy,iter,totiter)
+  subroutine dvmlm_minimize(nv,ns,nd,dim,data_samples,prm,grd,accuracy,iter,totiter)
     use model, only: update_gradient
     integer, intent(in) :: nv,ns,nd,dim
     integer, intent(in) :: data_samples(nv,ns)

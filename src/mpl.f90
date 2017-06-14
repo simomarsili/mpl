@@ -70,7 +70,7 @@ program mpl
      call model_set_myv(nd,nv,iv,data_samples,prm(:,iv),grd,err)
      niter = 0
      call cpu_time(start)
-     call dvmlm_minimize(nv,ns,nd,data_samples,prm(:,iv),grd,size(prm(:,iv)),accuracy,niter,neval)
+     call dvmlm_minimize(nv,ns,nd,size(prm(:,iv)),data_samples,prm(:,iv),grd,accuracy,niter,neval)
      call cpu_time(finish)
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
