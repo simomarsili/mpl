@@ -5,7 +5,6 @@
 program mpl
   use kinds
   use constants,     only: long_string
-  use units
   use command_line,  only: read_args
   use data,          only: nd,nv,ns,data_initialize,data_read
   use model,         only: initialize_model, model_set_myv,fix_gauge
@@ -31,8 +30,6 @@ program mpl
   integer                :: niter,neval
   real(kflt_single)      :: finish,start,start_min,end_min
 
-  call units_initialize()
-
   ! get command line 
   call read_args(data_file,w_id,lambda,skip_gaps,accuracy,scores_format,err)
   if(err /= 0) then 
@@ -41,7 +38,7 @@ program mpl
   end if
 
   ! open data file
-  call units_open(data_file,udata,'O',err)
+  open(newunit=udata,file=data_file,status='old',iostat=err)
   if(err /= 0) then 
      write(0,*) 'error: cant find data file'
      stop
@@ -49,7 +46,7 @@ program mpl
   
   ! open scores file
   scores_file = trim(data_file)//'.scores'
-  call units_open(scores_file,uscrs,'U',err)
+  open(newunit=uscrs,file=scores_file,status='replace',iostat=err)
 
   call data_initialize(udata)
   allocate(data_samples(nv,nd),stat=err)
