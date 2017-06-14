@@ -36,7 +36,7 @@ contains
     data_file = ''
     lambda = 0.01_kflt
     wid = 0.0_kflt
-    ignore_pivot = .false.
+    ignore_pivot = 0
     accuracy = 1
     scores_format = "r"
     ignore_pivot = 0

@@ -69,7 +69,7 @@ program mpl
      call cpu_time(finish)
      write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
           '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
-     call fix_gauge(nv,ns,prm(:ns,iv),prm(ns+1:,iv))
+     !call fix_gauge(nv,ns,prm(:ns,iv),prm(ns+1:,iv))
   end do
   flush(0)
   call cpu_time(end_min)

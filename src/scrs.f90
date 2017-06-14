@@ -88,20 +88,37 @@ contains
 
   end subroutine print_mat
 
-  pure subroutine compute_scores(nv,ns,couplings,ignore_pivot,scores)
+  subroutine compute_scores(nv,ns,couplings,ignore_pivot,scores)
     implicit none
     integer(kint), intent(in) :: nv,ns
     real(kflt), intent(in) :: couplings(ns,ns,nv,nv)
     integer, intent(in) :: ignore_pivot
     real(kflt), intent(out) :: scores(nv,nv)
-    integer :: iv,jv,err
-    real(kflt) :: sums(nv)
+    integer :: iv,jv,err,is,js
+    real(kflt) :: sums(nv),rsum(ns),csum(ns),matij(ns,ns),matji(ns,ns)
     real(kflt) :: totsum
+    integer :: inds(ns-1)
     
     scores = 0.0_kflt
     do iv = 1,nv-1
        do jv = iv+1,nv
-          scores(iv,jv) = sum((couplings(:,:,iv,jv) + transpose(couplings(:,:,jv,iv)))**2)
+          if (ignore_pivot >= 1 .and. ignore_pivot <= ns) then
+             is = 0
+             do js = 1,ns
+                if (js /= ignore_pivot) then
+                   is = is + 1
+                   inds(is) = js
+                end if
+             end do
+             matij = couplings(inds,inds,iv,jv)
+             matji = couplings(inds,inds,jv,iv)
+          else
+             matij = couplings(:,:,iv,jv)
+             matji = couplings(:,:,jv,iv)
+          end if
+          call double_center(matij)
+          call double_center(matji)
+          scores(iv,jv) = sum((matij + transpose(matji))**2)
           scores(jv,iv) = scores(iv,jv)
        end do
     end do
@@ -117,5 +134,25 @@ contains
        end do
     end do
   end subroutine compute_scores
+
+  pure subroutine double_center(a)
+    real(kflt), intent(inout) :: a(:,:)
+    integer :: i,j,n,m
+    real(kflt) :: totsum
+    real(kflt), allocatable :: rsum(:),csum(:)
+    integer :: err
+    n = size(a,dim=1)
+    m = size(a,dim=2)
+    allocate(rsum(n),csum(m),stat=err)
+    totsum = sum(a) / real(n*m)
+    csum = sum(a,dim=2) / real(n)
+    rsum = sum(a,dim=1) / real(m)
+    do j = 1,m
+       do i = 1,n
+          a(i,j) =  a(i,j) - csum(i) - rsum(j) + totsum
+       end do
+    end do
+    deallocate(rsum,csum)
+  end subroutine double_center
 
 end module scrs
