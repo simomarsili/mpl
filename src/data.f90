@@ -9,7 +9,7 @@ module data
 
   public :: w
 
-  public :: data_initialize, data_read
+  public :: initialize_data, read_data
 
   integer :: nd   ! number of data samples
   integer :: nv   ! number of variables
@@ -19,7 +19,7 @@ module data
 
 contains
 
-  subroutine data_initialize(udata,nd,nv,neff)
+  subroutine initialize_data(udata,nd,nv,neff)
     use constants, only: long_string
     use parser, only: parser_nfields
     integer, intent(in) :: udata
@@ -52,9 +52,9 @@ contains
 
     neff = nd
 
-  end subroutine data_initialize
+  end subroutine initialize_data
   
-  subroutine data_read(udata,w_id,ns,neff,data_samples)
+  subroutine read_data(udata,w_id,ns,neff,data_samples)
     use constants, only: long_string
     use parser, only: parser_nfields
     integer,    intent(in) :: udata
@@ -91,7 +91,7 @@ contains
        w = 1.0_kflt / real(nd)
     end if
 
-  end subroutine data_read
+  end subroutine read_data
 
   subroutine data_reweight(data_samples,w_id,neff)
     integer, intent(in) :: data_samples(:,:)

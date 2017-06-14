@@ -6,7 +6,7 @@ program mpl
   use kinds
   use constants,     only: long_string
   use command_line,  only: read_args
-  use data,          only: data_initialize,data_read
+  use data,          only: initialize_data,read_data
   use model,         only: initialize_model, model_set_myv,fix_gauge
   use scrs,          only: print_mat, compute_scores
   use dvmlm_wrapper, only: dvmlm_minimize
@@ -52,10 +52,10 @@ program mpl
   scores_file = trim(data_file)//'.scores'
   open(newunit=uscrs,file=scores_file,status='replace',iostat=err)
 
-  call data_initialize(udata,nd,nv,neff)
-  allocate(data_samples(nv,nd),stat=err)
   write(0,*) 'reading data...'
-  call data_read(udata,w_id,ns,neff,data_samples)
+  call initialize_data(udata,nd,nv,neff)
+  allocate(data_samples(nv,nd),stat=err)
+  call read_data(udata,w_id,ns,neff,data_samples)
 
   ! allocate parameters and gradient
   allocate(prm(ns + ns*ns*nv,nv),stat=err)
