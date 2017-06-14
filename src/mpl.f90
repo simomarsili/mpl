@@ -1,7 +1,6 @@
 ! Copyright (C) 2015-2017, Simone Marsili 
 ! All rights reserved.
 ! License: BSD 3 clause
-! License: BSD 3 clause
 
 program mpl
   use kinds
@@ -24,14 +23,14 @@ program mpl
   integer                :: niter,neval
   real(kflt_single)      :: finish,start,start_min,end_min
   character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
-  real(kflt), allocatable :: prm(:,:) ! 1D array of parameters (nv, ns + ns x nv x ns, nv)
-  real(kflt), allocatable :: grd(:) ! 1D gradient array (ns + ns x nv x ns)
   logical, parameter :: symmetrize=.true.
 
-  integer, allocatable :: data_samples(:,:)
-  real(kflt), allocatable :: fields(:,:) ! ns x nv
+  integer,    allocatable :: data_samples(:,:)  ! nv x nd
+  real(kflt), allocatable :: prm(:,:)           ! (ns + ns x ns x nv) x nv
+  real(kflt), allocatable :: grd(:)             ! (ns + ns x ns x nv) x nv
+  real(kflt), allocatable :: fields(:,:)        ! ns x nv
   real(kflt), allocatable :: couplings(:,:,:,:) ! ns x ns x nv x nv
-  real(kflt), allocatable :: scores(:,:) ! nv x nv
+  real(kflt), allocatable :: scores(:,:)        ! nv x nv
   character(1) :: scores_format
 
   call units_initialize()
