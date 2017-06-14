@@ -12,26 +12,24 @@ program mpl
   use scrs,          only: print_mat, compute_scores
   use dvmlm_wrapper, only: dvmlm_minimize
   implicit none
-  character(long_string) :: data_file
-  character(long_string) :: scores_file
-  real(kflt)             :: w_id
-  real(kflt)             :: lambda
+  ! input variables
+  character(long_string) :: data_file, scores_file
+  real(kflt)             :: w_id, lambda
   logical                :: skip_gaps
   integer                :: accuracy
-  integer                :: udata,uscrs
-  integer                :: err,iv
-  integer                :: niter,neval
-  real(kflt_single)      :: finish,start,start_min,end_min
-  character(long_string) :: syntax = 'syntax: mpl -i <data_file> -l <regularization_strength> [-w <weigths_file>] [-g]'
-  logical, parameter :: symmetrize=.true.
-
+  character(1)           :: scores_format
+  ! main arrays for the run
   integer,    allocatable :: data_samples(:,:)  ! nv x nd
   real(kflt), allocatable :: prm(:,:)           ! (ns + ns x ns x nv) x nv
   real(kflt), allocatable :: grd(:)             ! (ns + ns x ns x nv) x nv
   real(kflt), allocatable :: fields(:,:)        ! ns x nv
   real(kflt), allocatable :: couplings(:,:,:,:) ! ns x ns x nv x nv
   real(kflt), allocatable :: scores(:,:)        ! nv x nv
-  character(1) :: scores_format
+  ! 
+  integer                :: udata,uscrs
+  integer                :: err,iv
+  integer                :: niter,neval
+  real(kflt_single)      :: finish,start,start_min,end_min
 
   call units_initialize()
 
