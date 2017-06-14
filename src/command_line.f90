@@ -8,37 +8,6 @@ module command_line
   implicit none
   private
   public :: read_args
-  character(1), parameter :: nl=achar(10)
-  character(long_string) :: usage = &
-       'SYNTAX'//nl//&
-       nl//&
-       '    mpl -i <data_file> [-l <regularization_parameter>] [-w <percentage_identity>] [-g] [-a <accuracy_level>]'//nl//&
-       '                       [--scores_format <scores_matrix_format>]                                             '//nl//&
-       '    mpl -h                                                                                                  '//nl//&
-       nl//&
-       'OPTIONS'//nl//&
-       '-i, --input <data_file>                                                                                     '//nl//&
-       '    Data file                                                                                               '//nl//&
-       nl//&
-       '-l, --lambda <regularization_parameter> - float, optional                                                   '//nl//&
-       '    Controls L_2 regularization strength. Default: 0.01                                                     '//nl//&
-       nl//&
-       '-w, --reweight <percentage_identity> - float, optional                                                      '//nl//&
-       '    Percentage identity threshold to be used when reweighting data. Default: no reweight.                   '//nl//&
-       nl//&
-       '-g, --no_gap - optional                                                                                     '//nl//&
-       '    Do not take into account state 1 into the calculation of interaction scores.                            '//nl//&
-       nl//&
-       '-a, --accuracy <accuracy_level> - integer, optional                                                         '//nl//&
-       '    Controls thresholds for convergence. Possible values are {0, 1, 2}. Default: 1.                         '//nl//&
-       '    Larger values correspond to accurate solutions but slower covergence.                                   '//nl//&
-       nl//&
-       '--scores_format <scores_matrix_format> - string, optional                                                   '//nl//&
-       '    Possible values are {"plain", "array", "coordinate"}. Default: "plain".                                 '//nl//&
-       '    "plain": (row_index, column_index, score) format                                                        '//nl//&
-       '    "coordinate" and "array" correspond to Matrix Market (MM) array format (column-oriented)                '//nl//&
-       '    and coordinate format, respectively.                                                                    '//nl//&
-       '    See https://people.sc.fsu.edu/~jburkardt/data/mm/mm.html for more info.                                 '//nl
 
 contains
 
@@ -70,7 +39,7 @@ contains
     wid = 0.0_kflt
     skip_gaps = .false.
     accuracy = 1
-    scores_format = "p"
+    scores_format = "r"
     do while(iarg <= nargs)
        call get_command_argument(iarg,arg)
        select case(trim(arg))
@@ -121,14 +90,14 @@ contains
           iarg = iarg + 1
           call get_command_argument(iarg,arg)
           select case(trim(arg))
-          case("plain")
-             scores_format = "p"
+          case("rcv")
+             scores_format = "r"
           case("array")
              scores_format = "a"
           case("coordinate")
              scores_format = "c"
           case default
-             write(0,*) 'error ! possible formats for scores matrix format are {plain, coordinate, array}'
+             write(0,*) 'error ! possible formats for scores matrix format are {rcv, coordinate, array}'
              nerrs = nerrs + 1             
           end select
        case default
