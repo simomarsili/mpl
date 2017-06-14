@@ -95,7 +95,7 @@ contains
     integer, intent(in) :: ignore_pivot
     real(kflt), intent(out) :: scores(nv,nv)
     integer :: iv,jv,err
-    real(kflt), allocatable :: sums(:)
+    real(kflt) :: sums(nv)
     real(kflt) :: totsum
     
     scores = 0.0_kflt
@@ -106,7 +106,6 @@ contains
        end do
     end do
     scores = 0.5_kflt * sqrt(scores)
-    allocate(sums(nv),stat=err)
     do iv = 1,nv
        sums(iv) = sum(scores(:,iv))
     end do
@@ -117,7 +116,6 @@ contains
           scores(jv,iv) = scores(iv,jv)
        end do
     end do
-    deallocate(sums)
   end subroutine compute_scores
 
 end module scrs
