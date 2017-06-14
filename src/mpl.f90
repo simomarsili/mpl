@@ -14,7 +14,7 @@ program mpl
   ! input variables
   character(long_string) :: data_file, scores_file
   real(kflt)             :: w_id, lambda
-  logical                :: skip_gaps
+  logical                :: ignore_pivot
   integer                :: accuracy
   character(1)           :: scores_format
   ! main arrays for the run
@@ -31,7 +31,7 @@ program mpl
   real(kflt_single)      :: finish,start,start_min,end_min
 
   ! get command line 
-  call read_args(data_file,w_id,lambda,skip_gaps,accuracy,scores_format,err)
+  call read_args(data_file,w_id,lambda,ignore_pivot,accuracy,scores_format,err)
   if(err /= 0) then 
      write(0,100) 
      stop
@@ -84,7 +84,7 @@ program mpl
   deallocate(prm,grd)
 
   ! compute scores and print
-  call compute_scores(nv,ns,couplings,scores)
+  call compute_scores(nv,ns,couplings,ignore_pivot,scores)
   call print_mat(scores,uscrs,scores_format,err)
   if (err /= 0) stop
 

@@ -88,10 +88,11 @@ contains
 
   end subroutine print_mat
 
-  pure subroutine compute_scores(nv,ns,couplings,scores)
+  pure subroutine compute_scores(nv,ns,couplings,ignore_pivot,scores)
     implicit none
     integer(kint), intent(in) :: nv,ns
     real(kflt), intent(in) :: couplings(ns,ns,nv,nv)
+    logical, intent(in) :: ignore_pivot
     real(kflt), intent(out) :: scores(nv,nv)
     integer :: iv,jv,err
     real(kflt), allocatable :: sums(:)

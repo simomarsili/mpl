@@ -10,12 +10,12 @@ module command_line
 
 contains
 
-  subroutine read_args(data_file,wid,lambda,skip_gaps,accuracy,scores_format,nerrs)
+  subroutine read_args(data_file,wid,lambda,ignore_pivot,accuracy,scores_format,nerrs)
     use kinds
     character(long_string), intent(out) :: data_file
     real(kflt),             intent(out) :: wid
     real(kflt),             intent(out) :: lambda
-    logical,                intent(out) :: skip_gaps
+    logical,                intent(out) :: ignore_pivot
     integer,                intent(out) :: accuracy
     character(1),           intent(out) :: scores_format
     integer,                intent(out) :: nerrs
@@ -36,7 +36,7 @@ contains
     data_file = ''
     lambda = 0.01_kflt
     wid = 0.0_kflt
-    skip_gaps = .false.
+    ignore_pivot = .false.
     accuracy = 1
     scores_format = "r"
     do while(iarg <= nargs)
@@ -76,7 +76,7 @@ contains
           end if
        case('-g','--no_gap')
           ! remove contrib. from state 1 to the final scores
-          skip_gaps = .true.
+          ignore_pivot = .true.
        case('-a','--accuracy')
           iarg = iarg + 1
           call get_command_argument(iarg,arg)
