@@ -11,10 +11,6 @@ module data
 
   public :: initialize_data, read_data
 
-  integer :: nd   ! number of data samples
-  integer :: nv   ! number of variables
-  integer :: ns ! number of states per variable
-
   real(kflt), allocatable :: w(:)
 
 contains
@@ -62,6 +58,7 @@ contains
     integer, intent(out) :: ns
     real(kflt), intent(out) :: neff
     integer, intent(out) :: data_samples(:,:)
+    integer :: nd,nv
     integer :: i
     integer :: nfields
     integer :: err
@@ -103,6 +100,7 @@ contains
     integer, intent(in) :: data_samples(:,:)
     real(kflt), intent(in) :: w_id
     real(kflt), intent(out) :: neff
+    integer :: nd,nv
     integer :: id,jd
     integer :: err
     integer, allocatable :: x(:),y(:)
