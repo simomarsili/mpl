@@ -1,6 +1,3 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.803894.svg)](https://doi.org/10.5281/zenodo.803894)
-
-
 # mpl
 
 The mpl code takes a n x p data matrix as input and models the underlying p-dimensional probability distribution with a undirected graphical model
@@ -12,7 +9,8 @@ by performing a (multinomial) logistic regression of each variable on the remain
 We used mpl to predict chromatin-related protein-protein interactions
 (details in our paper ["Epigenomic co-localization and co-evolution reveal a key role for 5hmC as a communication hub in the chromatin network of ESCs"](http://www.sciencedirect.com/science/article/pii/S2211124716000280)) and contacts located at interfaces of eukaryotic protein heterodimers (["Conservation of coevolving protein interfaces bridges prokaryote--eukaryote homologies in the twilight zone"](http://www.pnas.org/content/113/52/15018.full)).
 
-This version of the code is no longer maintained, and is deposited here for reproducibility and to make it open source. 
+This version of the code is no longer maintained, and is deposited here for reproducibility and to make it open source.
+If you are interested in new releases/upgrades, please check the new [**fmpl** project](https://github.com/simomarsili/fmpl).
 
 # LICENSE (BSD 3 clause)
 
@@ -33,12 +31,12 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 If this software has been useful for your work, please cite using the following bibtex entry:
 ```
-@misc{mpl,
+@misc{fmpl,
   author       = {Simone Marsili}, 
-  title        = {mpl (1.0)},
+  title        = {fmpl 1.0},
   month        = jun,
   year         = 2017,
-  doi          = {10.5281/zenodo.803894},
-  url          = {http://dx.doi.org/10.5281/zenodo.803894}
+  doi          = {10.5281/zenodo.809400},
+  url          = {http://dx.doi.org/10.5281/zenodo.809400}
 }
 ```
