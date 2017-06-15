@@ -67,8 +67,9 @@ program mpl
   write(0,103) nd, nv, ns
   flush(0)
   if(w_id > 1.E-10_kflt) then
-     write(0,*) 'computing weights...'
+     write(0,'(a)') "Computing weights.."
      call data_reweight(data_samples,w_id,neff,w)
+     write(0,'(a,f8.1)') "Neff: ",neff
   else
      neff = nd
      w = 1.0_kflt / neff

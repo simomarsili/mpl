@@ -110,7 +110,6 @@ contains
     w = 1.0_kflt / w
     neff = sum(w)
     w = w / neff
-   write(0,*) 'neff: ', neff
 
   end subroutine data_reweight
 
