@@ -41,6 +41,12 @@ program mpl
      write(0,100) 
      stop
   end if
+  write(0,'("*** data file: ",a)') trim(data_file)
+  if (w_id > 0.0_kflt) write(0,'("*** %id threshold for weights: ", f5.1)') w_id
+  write(0,'("*** regularization strength: ",f6.4)') lambda
+  write(0,'("*** accuracy level: ",i1)') accuracy
+  
+
 
   ! open data file
   open(newunit=udata,file=data_file,status='old',action='read',iostat=err)
