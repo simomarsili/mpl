@@ -87,7 +87,7 @@ program mpl
           write(0,'(i4,"/",i4," completed in ",f5.1,1x,a," - ",f5.1," to end")')&
           iv, nv, elapsed_time, time_unit, expected_time
      if (iv == nv) &
-          write(0,'(i4,"/",i4," completed in ",f5.1,1x,a)')&
+          write(0,'(i4,"/",i4," completed in ",f8.3,1x,a)')&
           iv, nv, elapsed_time, time_unit
      !write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
      !'  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
