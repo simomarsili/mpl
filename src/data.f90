@@ -71,16 +71,20 @@ contains
     nv = size(data_samples,dim=1)
     nd = size(data_samples,dim=2)
     call cpu_time(t0)
-    tm = 0.0_kflt
     do i = 1,nd
        !if(mod(i,100) == 0) write(0,*) 'data: ', i
-       call cpu_time(start)
+       !call cpu_time(start)
        read(udata,'(a)',iostat=err) line
        call parser_nfields(line,newline,nfields)
        read(newline,*,iostat=err) data_samples(:,i)
        call cpu_time(finish)
-       tm = (finish - t0) / real(i)
-       if (mod(i,int(3.0/tm)+1) == 0) write(0,*) 'data: ', i
+       if (finish - t0 > 3.0) then
+          write(0,'(i6,"/",i6)') i, nd
+          t0 = finish
+       else if (i == nd) then 
+          write(0,'(i6,"/",i6)') i, nd         
+       end if
+       flush(0)
        if(err > 0) write(0,*) 'error: reading data'
     end do
 

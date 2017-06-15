@@ -32,7 +32,7 @@ program mpl
   integer                :: udata,uscrs
   integer                :: err,iv
   integer                :: niter,neval
-  real(kflt_single)      :: finish,start,start_min,end_min,tpv,elapsed_time,expected_time
+  real(kflt_single)      :: finish,start,start_min,tpv,elapsed_time,expected_time
   character(4) :: time_unit
 
   ! get command line 
@@ -51,11 +51,11 @@ program mpl
   
   ! open scores file
   scores_file = trim(data_file)//'.scores'
-  open(newunit=uscrs,file=scores_file,status='replace',iostat=err)
+  open(newunit=uscrs,file=scores_file,status='replace',action='write',iostat=err)
 
-  write(0,'(a)') '*** reading data...'
   call initialize_data(udata,nd,nv,neff)
   allocate(data_samples(nv,nd),stat=err)
+  write(0,'("*** reading ",i6," data samples...")') nd
   call read_data(udata,w_id,ns,neff,data_samples)
   write(0,'("*** sample size: ",i5)') nd
   write(0,'("*** dimensionality: ",i5)') nv
@@ -90,7 +90,7 @@ program mpl
         time_unit = "mins"
      end if
      if (mod(iv,int(3.0/tpv)+1)==0) &
-          write(0,'(i4,"/",i4," completed in ",f5.1,1x,a," (",f5.1," to end)")')&
+          write(0,'(i4,"/",i4," completed in ",f5.1,1x,a,"; ",f5.1," to end")')&
           iv, nv, elapsed_time, time_unit, expected_time
      if (iv == nv) &
           write(0,'("*** ",i4,"/",i4," completed in ",f9.3,1x,a," ***")')&
@@ -100,7 +100,6 @@ program mpl
      !call fix_gauge(nv,ns,prm(:ns,iv),prm(ns+1:,iv))
   end do
   flush(0)
-  call cpu_time(end_min)
   
   ! reorder prm array into fields and couplings 
   allocate(fields(ns,nv),couplings(ns,ns,nv,nv),stat=err)
