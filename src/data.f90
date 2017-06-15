@@ -66,14 +66,21 @@ contains
     integer :: nfields
     integer :: err
     character(long_string) :: line,newline
+    real(kflt_single)      :: finish,start,t0,tm
 
     nv = size(data_samples,dim=1)
     nd = size(data_samples,dim=2)
+    call cpu_time(t0)
+    tm = 0.0_kflt
     do i = 1,nd
-       if(mod(i,100) == 0)write(0,*) 'data: ', i
+       !if(mod(i,100) == 0) write(0,*) 'data: ', i
+       call cpu_time(start)
        read(udata,'(a)',iostat=err) line
        call parser_nfields(line,newline,nfields)
        read(newline,*,iostat=err) data_samples(:,i)
+       call cpu_time(finish)
+       tm = (finish - t0) / real(i)
+       if (mod(i,int(3.0/tm)+1) == 0) write(0,*) 'data: ', i
        if(err > 0) write(0,*) 'error: reading data'
     end do
 
