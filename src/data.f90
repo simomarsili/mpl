@@ -81,9 +81,6 @@ contains
 
     ns = maxval(data_samples)
     
-    write(0,*) '(nd, nv, ns)', nd, nv, ns
-    flush(0)
-    
     if(w_id > 1.E-10_kflt) then
        write(0,*) 'computing weights...'
        call data_reweight(data_samples,w_id,neff)

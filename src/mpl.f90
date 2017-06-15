@@ -33,7 +33,7 @@ program mpl
   integer                :: err,iv
   integer                :: niter,neval
   real(kflt_single)      :: finish,start,start_min,end_min,tpv,elapsed_time,expected_time
-  character(6) :: time_unit
+  character(4) :: time_unit
 
   ! get command line 
   call read_args(data_file,w_id,lambda,ignore_pivot,accuracy,scores_format,err)
@@ -53,10 +53,16 @@ program mpl
   scores_file = trim(data_file)//'.scores'
   open(newunit=uscrs,file=scores_file,status='replace',iostat=err)
 
-  write(0,*) 'reading data...'
+  write(0,'(a)') '*** reading data...'
   call initialize_data(udata,nd,nv,neff)
   allocate(data_samples(nv,nd),stat=err)
   call read_data(udata,w_id,ns,neff,data_samples)
+  write(0,'("*** sample size: ",i5)') nd
+  write(0,'("*** dimensionality: ",i5)') nv
+  write(0,'("*** n. of classes per variable: ",i5)') nd
+  flush(0)
+    
+
 
   ! allocate parameters and gradient
   allocate(prm(ns + ns*ns*nv,nv),stat=err)
@@ -64,7 +70,7 @@ program mpl
   allocate(scores(nv,nv),stat=err)
   call initialize_model(nv,ns,lambda)
 
-  write(0,*) 'minimizing...'
+  write(0,'(a)') '*** minimizing...'
   call cpu_time(start_min)
   tpv = 0.0_kflt
   ! loop over features
@@ -77,18 +83,18 @@ program mpl
      elapsed_time = finish - start_min
      tpv = elapsed_time / real(iv)
      expected_time = tpv * (nv - iv)
-     time_unit = "(secs)"
+     time_unit = "secs"
      if (elapsed_time + expected_time > 2*60.) then
         elapsed_time = elapsed_time / 60.0_kflt
         expected_time = expected_time / 60.0_kflt
-        time_unit = "(mins)"
+        time_unit = "mins"
      end if
      if (mod(iv,int(3.0/tpv)+1)==0) &
-          write(0,'(i4,"/",i4," completed in ",f5.1,1x,a," - ",f5.1," to end")')&
+          write(0,'(i4,"/",i4," completed in ",f5.1,1x,a," (",f5.1," to end)")')&
           iv, nv, elapsed_time, time_unit, expected_time
      if (iv == nv) &
-          write(0,'(i4,"/",i4," completed in ",f8.3,1x,a)')&
-          iv, nv, elapsed_time, time_unit
+          write(0,'("*** ",i4,"/",i4," completed in ",f9.3,1x,a," ***")')&
+          iv, nv, elapsed_time, "secs"
      !write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
      !'  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
      !call fix_gauge(nv,ns,prm(:ns,iv),prm(ns+1:,iv))
@@ -96,9 +102,6 @@ program mpl
   flush(0)
   call cpu_time(end_min)
   
-  write(0,*) 'minimization total (secs): ', end_min-start_min
-  flush(0)
-
   ! reorder prm array into fields and couplings 
   allocate(fields(ns,nv),couplings(ns,ns,nv,nv),stat=err)
   call reshape_prm(nv,ns,prm,fields,couplings)
