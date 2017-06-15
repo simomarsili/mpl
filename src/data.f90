@@ -7,11 +7,7 @@ module data
   implicit none
   private
 
-  public :: w
-
-  public :: initialize_data, read_data
-
-  real(kflt), allocatable :: w(:)
+  public :: initialize_data, read_data, data_reweight
 
 contains
 
@@ -41,12 +37,6 @@ contains
        nd = nd + 1
     end do
     rewind(udata)
-
-    ! allocate memory for the data
-
-    allocate(w(nd),stat=err)
-
-    neff = nd
 
   end subroutine initialize_data
   
@@ -87,19 +77,13 @@ contains
 
     ns = maxval(data_samples)
     
-    if(w_id > 1.E-10_kflt) then
-       write(0,*) 'computing weights...'
-       call data_reweight(data_samples,w_id,neff)
-    else
-       w = 1.0_kflt / real(nd)
-    end if
-
   end subroutine read_data
 
-  subroutine data_reweight(data_samples,w_id,neff)
+  subroutine data_reweight(data_samples,w_id,neff,w)
     integer, intent(in) :: data_samples(:,:)
     real(kflt), intent(in) :: w_id
     real(kflt), intent(out) :: neff
+    real(kflt), intent(out) :: w(:)
     integer :: nd,nv
     integer :: id,jd
     integer :: err

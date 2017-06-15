@@ -6,7 +6,7 @@ program mpl
   use kinds
   use constants,     only: long_string
   use command_line,  only: read_args
-  use data,          only: initialize_data,read_data
+  use data,          only: initialize_data,read_data,data_reweight
   use model,         only: initialize_model, model_set_myv,fix_gauge
   use scrs,          only: print_mat, compute_scores
   use dvmlm_wrapper, only: dvmlm_minimize
@@ -23,6 +23,7 @@ program mpl
   real(kflt) :: neff
   ! main arrays for the run
   integer,    allocatable :: data_samples(:,:)  ! nv x nd
+  real(kflt), allocatable :: w(:)
   real(kflt), allocatable :: prm(:,:)           ! (ns + ns x ns x nv) x nv
   real(kflt), allocatable :: grd(:)             ! (ns + ns x ns x nv) x nv
   real(kflt), allocatable :: fields(:,:)        ! ns x nv
@@ -59,14 +60,19 @@ program mpl
 
   call initialize_data(udata,nd,nv,neff)
   allocate(data_samples(nv,nd),stat=err)
+  allocate(w(nd),stat=err)
+
   write(0,'(/a)') "Reading data.."
   call read_data(udata,w_id,ns,neff,data_samples)
   write(0,103) nd, nv, ns
   flush(0)
-
-
-    
-
+  if(w_id > 1.E-10_kflt) then
+     write(0,*) 'computing weights...'
+     call data_reweight(data_samples,w_id,neff,w)
+  else
+     neff = nd
+     w = 1.0_kflt / neff
+  end if
 
   ! allocate parameters and gradient
   allocate(prm(ns + ns*ns*nv,nv),stat=err)
@@ -79,10 +85,10 @@ program mpl
   tpv = 0.0_kflt
   ! loop over features
   do iv = 1,nv
-     call model_set_myv(nd,nv,iv,data_samples,prm(:,iv),grd,err)
+     call model_set_myv(nd,nv,iv,data_samples,w,prm(:,iv),grd,err)
      niter = 0
      call cpu_time(start)
-     call dvmlm_minimize(nv,ns,nd,size(prm(:,iv)),data_samples,prm(:,iv),grd,accuracy,niter,neval)
+     call dvmlm_minimize(nv,ns,nd,size(prm(:,iv)),data_samples,w,prm(:,iv),grd,accuracy,niter,neval)
      call cpu_time(finish)
      elapsed_time = finish - start_min
      tpv = elapsed_time / real(iv)
