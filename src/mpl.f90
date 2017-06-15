@@ -32,7 +32,8 @@ program mpl
   integer                :: udata,uscrs
   integer                :: err,iv
   integer                :: niter,neval
-  real(kflt_single)      :: finish,start,start_min,end_min
+  real(kflt_single)      :: finish,start,start_min,end_min,tpv,elapsed_time,expected_time
+  character(6) :: time_unit
 
   ! get command line 
   call read_args(data_file,w_id,lambda,ignore_pivot,accuracy,scores_format,err)
@@ -42,7 +43,7 @@ program mpl
   end if
 
   ! open data file
-  open(newunit=udata,file=data_file,status='old',iostat=err)
+  open(newunit=udata,file=data_file,status='old',action='read',iostat=err)
   if(err /= 0) then 
      write(0,'("error ! cannot access ",a,": file not found")') trim(data_file)
      stop
@@ -63,8 +64,9 @@ program mpl
   allocate(scores(nv,nv),stat=err)
   call initialize_model(nv,ns,lambda)
 
-  write(0,*) 'minimize...'
+  write(0,*) 'minimizing...'
   call cpu_time(start_min)
+  tpv = 0.0_kflt
   ! loop over features
   do iv = 1,nv
      call model_set_myv(nd,nv,iv,data_samples,prm(:,iv),grd,err)
@@ -72,8 +74,23 @@ program mpl
      call cpu_time(start)
      call dvmlm_minimize(nv,ns,nd,size(prm(:,iv)),data_samples,prm(:,iv),grd,accuracy,niter,neval)
      call cpu_time(finish)
-     write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
-          '  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
+     elapsed_time = finish - start_min
+     tpv = elapsed_time / real(iv)
+     expected_time = tpv * (nv - iv)
+     time_unit = "(secs)"
+     if (elapsed_time + expected_time > 2*60.) then
+        elapsed_time = elapsed_time / 60.0_kflt
+        expected_time = expected_time / 60.0_kflt
+        time_unit = "(mins)"
+     end if
+     if (mod(iv,int(3.0/tpv)+1)==0) &
+          write(0,'(i4,"/",i4," completed in ",f5.1,1x,a," - ",f5.1," to end")')&
+          iv, nv, elapsed_time, time_unit, expected_time
+     if (iv == nv) &
+          write(0,'(i4,"/",i4," completed in ",f5.1,1x,a)')&
+          iv, nv, elapsed_time, time_unit
+     !write(0,'(a,i5,a,2i5,a,f8.3,a)') ' variable ', iv, &
+     !'  converged (niter,neval) ', niter, neval, ' in ', finish-start, ' secs'
      !call fix_gauge(nv,ns,prm(:ns,iv),prm(ns+1:,iv))
   end do
   flush(0)
@@ -111,8 +128,8 @@ program mpl
          '    [default: no reweight.]                                    '/&
          '                                                               '/&
          '-a, --accuracy <accuracy_level> integer, optional              '/&
-         '    Larger values correspond to increased accuracy and slower  '/&
-         '    covergence. Possible values are {0, 1, 2}.                 '/&
+         '    Larger values correspond to stricter convergence criteria  '/&
+         '    and longer covergence time. Possible values are {0, 1, 2}. '/&
          '    [default: 1.]                                              '/&
          '                                                               '/&
          '--ignore_pivot <pivot_state> integer, optional                 '/&
