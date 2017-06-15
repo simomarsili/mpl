@@ -44,7 +44,7 @@ program mpl
   ! open data file
   open(newunit=udata,file=data_file,status='old',iostat=err)
   if(err /= 0) then 
-     write(0,*) 'error: cant find data file'
+     write(0,'("error ! cannot access ",a,": file not found")') trim(data_file)
      stop
   end if
   
