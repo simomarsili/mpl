@@ -72,8 +72,6 @@ contains
     nd = size(data_samples,dim=2)
     call cpu_time(t0)
     do i = 1,nd
-       !if(mod(i,100) == 0) write(0,*) 'data: ', i
-       !call cpu_time(start)
        read(udata,'(a)',iostat=err) line
        call parser_nfields(line,newline,nfields)
        read(newline,*,iostat=err) data_samples(:,i)
@@ -85,7 +83,7 @@ contains
           write(0,'(i6,"/",i6)') i, nd         
        end if
        flush(0)
-       if(err > 0) write(0,*) 'error: reading data'
+       if(err > 0) write(0,*) 'error ! reading data'
     end do
 
     if (any(data_samples==0)) data_samples = data_samples + 1

@@ -28,12 +28,13 @@ program mpl
   real(kflt), allocatable :: fields(:,:)        ! ns x nv
   real(kflt), allocatable :: couplings(:,:,:,:) ! ns x ns x nv x nv
   real(kflt), allocatable :: scores(:,:)        ! nv x nv
-  ! 
+  !
   integer                :: udata,uscrs
   integer                :: err,iv
   integer                :: niter,neval
   real(kflt_single)      :: finish,start,start_min,tpv,elapsed_time,expected_time
   character(4) :: time_unit
+  
 
   ! get command line 
   call read_args(data_file,w_id,lambda,ignore_pivot,accuracy,scores_format,err)
@@ -41,12 +42,9 @@ program mpl
      write(0,100) 
      stop
   end if
-  write(0,'("*** data file: ",a)') trim(data_file)
-  if (w_id > 0.0_kflt) write(0,'("*** %id threshold for weights: ", f5.1)') w_id
-  write(0,'("*** regularization strength: ",f6.4)') lambda
-  write(0,'("*** accuracy level: ",i1)') accuracy
-  
-
+  ! print an header for the run
+  write(0,101) trim(data_file), lambda, accuracy
+  if (w_id > 0.0_kflt) write(0,102) w_id
 
   ! open data file
   open(newunit=udata,file=data_file,status='old',action='read',iostat=err)
@@ -61,12 +59,12 @@ program mpl
 
   call initialize_data(udata,nd,nv,neff)
   allocate(data_samples(nv,nd),stat=err)
-  write(0,'("*** reading ",i6," data samples...")') nd
+  write(0,'(/a)') "Reading data.."
   call read_data(udata,w_id,ns,neff,data_samples)
-  write(0,'("*** sample size: ",i6)') nd
-  write(0,'("*** dimensionality: ",i5)') nv
-  write(0,'("*** classes per variable: ",i2)') ns
+  write(0,103) nd, nv, ns
   flush(0)
+
+
     
 
 
@@ -76,7 +74,7 @@ program mpl
   allocate(scores(nv,nv),stat=err)
   call initialize_model(nv,ns,lambda)
 
-  write(0,'(a)') '*** minimizing...'
+  write(0,'(/,a)') 'Running..'
   call cpu_time(start_min)
   tpv = 0.0_kflt
   ! loop over features
@@ -116,6 +114,21 @@ program mpl
   call compute_scores(nv,ns,couplings,ignore_pivot,scores)
   call print_mat(scores,uscrs,scores_format,err)
   if (err /= 0) stop
+
+101 format(&
+         '# mpl                                                              '/&
+         '#                                                                  '/&
+         '# input data file: ',a,'                                           '/&
+         '# regularization: ',f6.4,'                                         '/&
+         '# accuracy level: ',i1,'                                           ')
+
+102 format(&
+         '# reweight samples; % id threshold: ',f5.1,'                       ')
+ 
+103 format(&
+         'Sample size         : ',i6,'                                       '/&
+         'Dimensionality      : ',i6,'                                       '/&
+         'Classes per variable: ',i6,'                                       ')
 
 100 format(/&
          'mpl                                                            '/&
