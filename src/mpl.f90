@@ -57,9 +57,9 @@ program mpl
   allocate(data_samples(nv,nd),stat=err)
   write(0,'("*** reading ",i6," data samples...")') nd
   call read_data(udata,w_id,ns,neff,data_samples)
-  write(0,'("*** sample size: ",i5)') nd
+  write(0,'("*** sample size: ",i6)') nd
   write(0,'("*** dimensionality: ",i5)') nv
-  write(0,'("*** n. of classes per variable: ",i5)') nd
+  write(0,'("*** classes per variable: ",i2)') ns
   flush(0)
     
 
